@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Timer</string>
+    <string name="dialog_fire_missiles">Delete</string>
+    <string name="fire">Yes</string>
+    <string name="edit">Edit</string>
+    <string name="add">Add</string>
+    <string name="delete">Delete</string>
+    <string name="playDescription">Menu button, which shows popup menu</string>
+    <string name="popupDescription">Button, which starts training</string>
+    <string name="training_name">Training name</string>
+    <string name="preparing_time">Preparing time</string>
+    <string name="minus">-</string>
+    <string name="plus">+</string>
+    <string name="confirm">Confirm</string>
+    <string name="cooldown_time">Cooldown time</string>
+    <string name="rest_between_sets">Rest between sets</string>
+    <string name="sets_amount">Sets amount</string>
+    <string name="cycles_amount">Cycles amount</string>
+    <string name="rest_time">Rest time</string>
+    <string name="working_time">Working time</string>
+    <string name="change_color">Change color</string>
+    <string name="current_color">Current color</string>
+</resources>

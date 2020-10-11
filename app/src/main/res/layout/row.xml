@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="10dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginEnd="10dp"
+    android:layout_marginBottom="5dp"
+    android:backgroundTint="@android:color/transparent"
+    android:backgroundTintMode="src_atop"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="10dp"
+    app:cardMaxElevation="20dp"
+    app:contentPaddingBottom="10dp"
+    app:contentPaddingLeft="5dp"
+    app:contentPaddingRight="10dp">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:background="#FFC107"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:id="@+id/timerTitleText"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="0.9"
+                android:background="@android:color/transparent"
+                android:paddingStart="7dp"
+                android:paddingEnd="3dp"
+                android:text="Timer name"
+                android:textColor="#F8F8F8"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/playButton"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="0.07"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/playDescription"
+                android:paddingTop="5dp"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/play"
+                tools:ignore="HardcodedText" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1" />
+
+            <ImageButton
+                android:id="@+id/editButton"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="0.07"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/popupDescription"
+                android:paddingTop="5dp"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/menu" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/preparationTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#AF2E2E"
+            android:paddingStart="7dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="3dp"
+            android:paddingBottom="1dp"
+            android:text="@string/preparing_time"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/workingTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="7dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="3dp"
+            android:paddingBottom="1dp"
+            android:text="@string/working_time"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/restTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#501515"
+            android:paddingStart="7dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="3dp"
+            android:paddingBottom="1dp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/cyclesAmountText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="7dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="3dp"
+            android:paddingBottom="1dp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/setsAmountText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="7dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="3dp"
+            android:paddingBottom="1dp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/betweenSetsRestText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="7dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="3dp"
+            android:paddingBottom="1dp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/cooldownTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="7dp"
+            android:paddingTop="1dp"
+            android:paddingEnd="3dp"
+            android:paddingBottom="1dp"
+            android:text="@string/cooldown_time"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
