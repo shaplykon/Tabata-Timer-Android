@@ -5,7 +5,10 @@
     android:layout_height="match_parent"
     android:layout_rowSpan="5"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:paddingTop="90dp"
+    tools:context=".MainActivity"
+
+    >
 
     <TableLayout
         android:layout_width="match_parent"
@@ -21,7 +24,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:labelFor="@id/trainingNameEditText"
-                android:text="@string/training_name" />
+                android:text="@string/training_name"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow
@@ -49,7 +55,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/preparingTimeEdit"
-                android:text="@string/preparing_time" />
+                android:text="@string/preparing_time"
+                android:textAlignment="center"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow
@@ -90,7 +98,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/workingEditText"
-                android:text="@string/working_time" />
+                android:text="@string/working_time"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow
@@ -131,7 +142,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/restEditText"
-                android:text="@string/rest_time" />
+                android:text="@string/rest_time"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow
@@ -172,7 +186,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/cyclesEditText"
-                android:text="@string/cycles_amount" />
+                android:text="@string/cycles_amount"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow
@@ -213,7 +230,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/setsAmountEdit"
-                android:text="@string/sets_amount" />
+                android:text="@string/sets_amount"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow
@@ -254,7 +274,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/restBetweenSetsEdit"
-                android:text="@string/rest_between_sets" />
+                android:text="@string/rest_between_sets"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow
@@ -295,7 +318,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@id/cooldownTimeEdit"
-                android:text="@string/cooldown_time" />
+                android:text="@string/cooldown_time"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:textStyle="bold" />
         </TableRow>
 
         <TableRow

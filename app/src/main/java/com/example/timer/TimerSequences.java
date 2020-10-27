@@ -29,6 +29,18 @@ class TimerSequence implements Serializable {
         this.cooldownTime = _cooldownTime;
     }
 
+    public TimerSequence() {
+        this.id = 0;
+        this.title = "";
+        this.preparationTime = 0;
+        this.workingTime = 0;
+        this.restTime = 0;
+        this.cyclesAmount = 0;
+        this.setsAmount = 0;
+        this.betweenSetsRest = 0;
+        this.cooldownTime = 0;
+    }
+
     public void setId(int _id) {
         id = _id;
     }

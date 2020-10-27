@@ -70,6 +70,25 @@ class SQLiteHelper extends SQLiteOpenHelper {
         cursor.close();
     }
 
+
+    public TimerSequence getTimerByID(int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TIMER_NAME + " WHERE " + COLUMN_ID + " = " + String.valueOf(id) + ";", null);
+        cursor.moveToFirst();
+        TimerSequence timer = new TimerSequence(cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndex(SQLiteHelper.TRAINING_TITLE)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.PREPARATION_TIME)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.WORKING_TIME)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.REST_TIME)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.CYCLES_AMOUNT)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.SETS_AMOUNT)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.BETWEEN_SETS_REST)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COOLDOWN_TIME)));
+        cursor.close();
+       return timer;
+
+    }
+
     public int getColorByTimerID(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SETTINGS_NAME + " WHERE " + TIMER_ID + " = " + String.valueOf(id) + ";", null);
@@ -77,7 +96,8 @@ class SQLiteHelper extends SQLiteOpenHelper {
             cursor.moveToFirst();
             return cursor.getInt(cursor.getColumnIndex(SQLiteHelper.TIMER_COLOR));
         }
-        else return 1;
+        else return -1;
+
     }
 
     public ArrayList<TimerSequence> getList() {

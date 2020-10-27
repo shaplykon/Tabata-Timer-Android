@@ -39,7 +39,7 @@
                 android:background="@android:color/transparent"
                 android:paddingStart="7dp"
                 android:paddingEnd="3dp"
-                android:text="Timer name"
+                android:text="@string/training_name"
                 android:textColor="#F8F8F8"
                 android:textSize="20sp"
                 android:textStyle="bold" />

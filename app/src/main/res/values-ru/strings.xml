@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Таймер</string>
+    <string name="dialog_fire_missiles">Удалить</string>
+    <string name="fire">Да</string>
+    <string name="edit">Редактировать</string>
+    <string name="add">Добавить</string>
+    <string name="delete">Удалить</string>
+    <string name="training_name">Название тренировки</string>
+    <string name="preparing_time">Время подготовки</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="cooldown_time">Успокоиться</string>
+    <string name="rest_between_sets">Отдых между сетами</string>
+    <string name="sets_amount">Количество сетов</string>
+    <string name="cycles_amount">Количество циклов</string>
+    <string name="rest_time">Отдых</string>
+    <string name="working_time">Работа</string>
+    <string name="change_color">Изменить цвет</string>
+    <string name="current_color">Текущий цвет</string>
+    <string name="action_settings">Настройки</string>
+    <string name="title_activity_settings">Настройки</string>
+    <string name="darkMode">Тёмная тема</string>
+    <string name="engLocale">Использовать английскую локализацию</string>
+    <string name="small">Маленький</string>
+    <string name="medium">Средний</string>
+    <string name="large">Большой</string>
+    <string name="font_size_title">Размер шрифта</string>
+    <string name="font_size_dialog_title">Выберите размер шрифта</string>
+    <string name="font_size_summary">Изменения размера шрифта</string>
+    <string name="preparing">Подготовка</string>
+    <string name="work">Работа</string>
+    <string name="rest">Отдых</string>
+    <string name="cooldown">Успокоиться</string>
+    <string name="finish">Финиш</string>
+    <string name="training_end">Тренировка окончена</string>
+</resources>
