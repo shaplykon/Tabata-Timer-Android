@@ -41,10 +41,8 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
 
         final Intent intent = getIntent();
 
-
-        editableViewModel = new ViewModelProvider(this).get(EditableTimerViewModel.class);
         TimerSequence timer = (TimerSequence) intent.getSerializableExtra("timer");
-        editableViewModel.setTimer(timer, getApplicationContext());
+        editableViewModel = new ViewModelProvider(this, new EditableViewModelFactory(timer)).get(EditableTimerViewModel.class);
 
 
         final String type = intent.getStringExtra("type");
@@ -86,7 +84,6 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         });
 
         colorView.setBackgroundColor(editableViewModel.color.getValue());
-
 
         trainingNameEditText.setText(editableViewModel.title.getValue());
         preparingTimeEdit.setText(editableViewModel.preparingTime.getValue() + "");
@@ -212,9 +209,7 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         final View.OnClickListener confirmButtonListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int id = editableViewModel.saveTimer(type, getApplicationContext());
-                TimerSequence timer = editableViewModel.getTimer();
-                timer.setId(id);
+                TimerSequence timer = editableViewModel.saveTimer(type, getApplicationContext());
                 Intent data = new Intent();
                 data.putExtra("timer", timer);
                 setResult(RESULT_OK, data);

@@ -33,4 +33,9 @@
     <string name="cooldown">Успокоиться</string>
     <string name="finish">Финиш</string>
     <string name="training_end">Тренировка окончена</string>
+    <string name="reset_data">Очистить данные</string>
+    <string name="reset_data_summary">Удаляет все пользовательские данные</string>
+    <string name="reset_dialog_title">Очистка данных</string>
+    <string name="reset_dialog_message">Вы уверены, что хотите удалить все сохраненные данные?</string>
+    <string name="yes">Да</string>
 </resources>

@@ -30,7 +30,6 @@ class SQLiteHelper extends SQLiteOpenHelper {
 
     // SETTINGS table column names
     public static final String TIMER_COLOR = "COLOR";
-    public static final String TIMER_ID = "ID_TIMER";
     // Common tables names
     public static final String COLUMN_ID = "_id";
 
@@ -45,13 +44,7 @@ class SQLiteHelper extends SQLiteOpenHelper {
                 PREPARATION_TIME + " INT NOT NULL, " + WORKING_TIME + " INT NOT NULL, " +
                 REST_TIME + " INT NOT NULL, " + CYCLES_AMOUNT + " INT NOT NULL, " + SETS_AMOUNT +
                 " INT NOT NULL, " + BETWEEN_SETS_REST + " INT NOT NULL, " + COOLDOWN_TIME +
-                " INT NOT NULL);";
-        db.execSQL(createTable);
-
-        createTable = "CREATE TABLE " + TABLE_SETTINGS_NAME + " (" + COLUMN_ID +
-                " INTEGER PRIMARY KEY AUTOINCREMENT, " + TIMER_COLOR + " INT NOT NULL, " + TIMER_ID +
-                " INT NOT NULL);";
-
+                " INT NOT NULL, " + TIMER_COLOR + " INT NOT NULL);";
         db.execSQL(createTable);
     }
 
@@ -73,9 +66,11 @@ class SQLiteHelper extends SQLiteOpenHelper {
 
     public TimerSequence getTimerByID(int id){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TIMER_NAME + " WHERE " + COLUMN_ID + " = " + String.valueOf(id) + ";", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TIMER_NAME + " WHERE "
+                + COLUMN_ID + " = " + id  + ";", null);
         cursor.moveToFirst();
-        TimerSequence timer = new TimerSequence(cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COLUMN_ID)),
+        TimerSequence timer =
+                new TimerSequence(cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COLUMN_ID)),
                 cursor.getString(cursor.getColumnIndex(SQLiteHelper.TRAINING_TITLE)),
                 cursor.getInt(cursor.getColumnIndex(SQLiteHelper.PREPARATION_TIME)),
                 cursor.getInt(cursor.getColumnIndex(SQLiteHelper.WORKING_TIME)),
@@ -83,20 +78,10 @@ class SQLiteHelper extends SQLiteOpenHelper {
                 cursor.getInt(cursor.getColumnIndex(SQLiteHelper.CYCLES_AMOUNT)),
                 cursor.getInt(cursor.getColumnIndex(SQLiteHelper.SETS_AMOUNT)),
                 cursor.getInt(cursor.getColumnIndex(SQLiteHelper.BETWEEN_SETS_REST)),
-                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COOLDOWN_TIME)));
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COOLDOWN_TIME)),
+                cursor.getInt(cursor.getColumnIndex(SQLiteHelper.TIMER_COLOR)));
         cursor.close();
        return timer;
-
-    }
-
-    public int getColorByTimerID(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SETTINGS_NAME + " WHERE " + TIMER_ID + " = " + String.valueOf(id) + ";", null);
-        if (cursor.getCount()> 0) {
-            cursor.moveToFirst();
-            return cursor.getInt(cursor.getColumnIndex(SQLiteHelper.TIMER_COLOR));
-        }
-        else return -1;
 
     }
 
@@ -107,7 +92,8 @@ class SQLiteHelper extends SQLiteOpenHelper {
         if (cursor.getCount() > 0) {
             if (cursor.moveToFirst()) {
                 do {
-                    TimerSequence timer = new TimerSequence(cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COLUMN_ID)),
+                    TimerSequence timer =
+                            new TimerSequence(cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COLUMN_ID)),
                             cursor.getString(cursor.getColumnIndex(SQLiteHelper.TRAINING_TITLE)),
                             cursor.getInt(cursor.getColumnIndex(SQLiteHelper.PREPARATION_TIME)),
                             cursor.getInt(cursor.getColumnIndex(SQLiteHelper.WORKING_TIME)),
@@ -115,7 +101,8 @@ class SQLiteHelper extends SQLiteOpenHelper {
                             cursor.getInt(cursor.getColumnIndex(SQLiteHelper.CYCLES_AMOUNT)),
                             cursor.getInt(cursor.getColumnIndex(SQLiteHelper.SETS_AMOUNT)),
                             cursor.getInt(cursor.getColumnIndex(SQLiteHelper.BETWEEN_SETS_REST)),
-                            cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COOLDOWN_TIME)));
+                            cursor.getInt(cursor.getColumnIndex(SQLiteHelper.COOLDOWN_TIME)),
+                            cursor.getInt(cursor.getColumnIndex(SQLiteHelper.TIMER_COLOR)));
                     timerList.add(timer);
 
                 } while (cursor.moveToNext());

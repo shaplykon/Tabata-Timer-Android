@@ -52,4 +52,9 @@
     <string name="cooldown">Cooldown</string>
     <string name="finish">Finish</string>
     <string name="training_end">Training has finished</string>
+    <string name="reset_data">Reset data</string>
+    <string name="reset_data_summary">Clears all application data</string>
+    <string name="reset_dialog_title">Clear data</string>
+    <string name="reset_dialog_message">Are you sure you want to clear all stored data?</string>
+    <string name="yes">Yes</string>
 </resources>

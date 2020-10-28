@@ -34,19 +34,22 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity implements
         DataAdapter.OnItemDeleteListener,
         DataAdapter.OnTimerListener,
-        DataAdapter.OnLongTimerListener {
+        DataAdapter.OnLongTimerListener
+{
 
     int ADD_DATA_REQUEST = 1;
     int EDIT_DATA_REQUEST = 2;
+    int SETTINGS_REQUEST = 3;
 
     RecyclerView recyclerView;
     ArrayList<TimerSequence> timerList = new ArrayList<>();
-    SQLiteHelper dbHelper;
     LinearLayoutManager linearLayoutManager;
     FloatingActionButton addButton;
     DataAdapter dataAdapter;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+    SQLiteTimerRepository timerRepository;
+
 
     @SuppressLint({"SetTextI18n", "CommitPrefEdits"})
     @Override
@@ -55,17 +58,17 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        timerRepository = new SQLiteTimerRepository(getApplicationContext());
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = sharedPreferences.edit();
-
-        dbHelper = new SQLiteHelper(getApplicationContext());
 
         recyclerView = findViewById(R.id.recyclerView);
         linearLayoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
 
         addButton = findViewById(R.id.addButton);
         recyclerView.setLayoutManager(linearLayoutManager);
-        timerList = dbHelper.getList();
+        timerList = timerRepository.get();
 
         dataAdapter = new DataAdapter(MainActivity.this, timerList, this, this);
         recyclerView.setAdapter(dataAdapter);
@@ -102,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
             Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, SETTINGS_REQUEST );
         }
         return super.onOptionsItemSelected(item);
     }
@@ -121,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements
         if (requestCode == ADD_DATA_REQUEST) {
             if (resultCode == RESULT_OK && data != null) {
                 timerList.add((TimerSequence) data.getSerializableExtra("timer"));
-                Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
-
+                //dataAdapter.notifyData(timerList);
+                recyclerView.getAdapter().notifyDataSetChanged();
             }
         } else if (requestCode == EDIT_DATA_REQUEST && resultCode == RESULT_OK && data != null) {
             TimerSequence timer = (TimerSequence) data.getSerializableExtra("timer");
@@ -136,7 +139,15 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
 
-        } else {
+        } else if(requestCode == SETTINGS_REQUEST && resultCode == RESULT_OK){
+            //editor.clear();
+            //editor.apply();
+            timerRepository.clear();
+            timerList.clear();
+            dataAdapter.notifyData(timerList);
+
+        }
+        else {
             super.onActivityResult(requestCode, resultCode, data);
         }
 
@@ -149,7 +160,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onItemDelete(int position) {
+        timerRepository.delete(timerList.get(position).getId());
         timerList.remove(position);
+        recyclerView.getRecycledViewPool().clear();
     }
 
     @Override
@@ -158,4 +171,5 @@ public class MainActivity extends AppCompatActivity implements
         LocaleHelper.setLocale(MainActivity.this, LocaleHelper.getLanguage(MainActivity.this));
         recyclerView.getAdapter().notifyDataSetChanged();
     }
+
 }

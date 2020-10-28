@@ -1,13 +1,11 @@
 package com.example.timer;
 
+import android.os.Bundle;
+
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 
 
@@ -18,24 +16,24 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import java.util.Locale;
 
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements OnDataReset{
 
     private SettingsFragment settingsFragment;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+
 
     @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
+      //  onDataReset = (OnDataReset) getCallingActivity();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor = sharedPreferences.edit();
         settingsFragment = new SettingsFragment();
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, settingsFragment)
@@ -128,13 +126,24 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+
+        Preference resetPreference = settingsFragment.findPreference("resetData");
+        resetPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                ResetDialogFragment resetDialogFragment = new ResetDialogFragment();
+                resetDialogFragment.show(getSupportFragmentManager(), "reset");
+                return true;
+            }
+        });
         super.onResume();
     }
 
-
-
-
-
+    @Override
+    public void reset() {
+        setResult(RESULT_OK);
+        finish();
+    }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
         @Override
@@ -144,7 +153,12 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
+
+
+
 }
-interface  OnLocaleChanged {
-    void updateLocale();
+
+interface OnDataReset{
+    void reset();
 }
+

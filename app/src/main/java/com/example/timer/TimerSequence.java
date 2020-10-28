@@ -2,7 +2,7 @@ package com.example.timer;
 
 import java.io.Serializable;
 
-class TimerSequence implements Serializable {
+public class TimerSequence implements Serializable {
 
     private int id;
     private String title;
@@ -13,11 +13,11 @@ class TimerSequence implements Serializable {
     private int betweenSetsRest;
     private int setsAmount;
     private int cooldownTime;
-
+    private int color;
 
     public TimerSequence(int _id, String _title, int _preparationTime, int _workingTime,
                          int _restTime, int _cyclesAmount, int _setsAmount, int _betweenSetsRest,
-                         int _cooldownTime) {
+                         int _cooldownTime, int _color) {
         this.id = _id;
         this.title = _title;
         this.preparationTime = _preparationTime;
@@ -27,6 +27,7 @@ class TimerSequence implements Serializable {
         this.setsAmount = _setsAmount;
         this.betweenSetsRest = _betweenSetsRest;
         this.cooldownTime = _cooldownTime;
+        this.color = _color;
     }
 
     public TimerSequence() {
@@ -39,6 +40,7 @@ class TimerSequence implements Serializable {
         this.setsAmount = 0;
         this.betweenSetsRest = 0;
         this.cooldownTime = 0;
+        this.color = 0;
     }
 
     public void setId(int _id) {
@@ -52,7 +54,9 @@ class TimerSequence implements Serializable {
     public void setPreparationTime(int _preparationTime) {
         preparationTime = Math.max(_preparationTime, 0);
     }
-
+    public void setColor(int color) {
+        this.color = color;
+    }
     public void setWorkingTime(int _workingTime) {
         workingTime = Math.max(_workingTime, 0);
     }
@@ -112,6 +116,11 @@ class TimerSequence implements Serializable {
     public int getCooldownTime() {
         return cooldownTime;
     }
+
+    public int getColor() {
+        return color;
+    }
+
 
 }
 

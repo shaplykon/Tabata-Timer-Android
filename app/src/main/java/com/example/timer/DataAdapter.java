@@ -32,6 +32,10 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
     private final OnItemDeleteListener mOnDeleteListener;
     private final SQLiteHelper helper;
 
+    public void notifyData(ArrayList<TimerSequence> list){
+        timerList = list;
+        this.notifyDataSetChanged();
+    }
 
     public DataAdapter(Context context, ArrayList<TimerSequence> timerList,
                        OnTimerListener onTimerListener, OnItemDeleteListener mOnDeleteListener) {
@@ -63,11 +67,8 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
         holder.setsAmount.setText(resources.getString(R.string.sets_amount) + ": " + timerSequence.getSetsAmount());
         holder.betweenSetsRest.setText(resources.getString(R.string.rest_between_sets) + ": " + timerSequence.getBetweenSetsRest());
         holder.cooldownTime.setText(resources.getString(R.string.cooldown_time) + ": " + timerSequence.getCooldownTime());
-        timerList = helper.getList();
-
-        int color = helper.getColorByTimerID(timerList.get(position).getId());
-        holder.layout.setBackgroundColor(color);
-        holder.cardView.setCardBackgroundColor(color);
+        holder.layout.setBackgroundColor(timerSequence.getColor());
+        holder.cardView.setCardBackgroundColor(timerSequence.getColor());
     }
 
     @Override
@@ -106,14 +107,14 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
         OnTimerListener onTimerListener;
         OnLongTimerListener onLongClickListener;
         OnItemDeleteListener onItemDeleteListener;
-        ImageButton deleteButton;
+        ImageButton editButton;
         ImageButton playButton;
 
         public DataHolder(View itemView, OnTimerListener mOnTimerListener, OnItemDeleteListener mOnDeleteListener) {
             super(itemView);
             cardView = itemView.findViewById(R.id.cardView);
             layout = itemView.findViewById(R.id.linearLayout);
-            deleteButton = itemView.findViewById(R.id.editButton);
+            editButton = itemView.findViewById(R.id.editButton);
             playButton = itemView.findViewById(R.id.playButton);
 
             title = itemView.findViewById(R.id.timerTitleText);
@@ -140,63 +141,46 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
                 }
             });
 
-
-            deleteButton.setOnClickListener(new View.OnClickListener() {
+            final PopupMenu.OnMenuItemClickListener onMenuListener = new PopupMenu.OnMenuItemClickListener() {
+                @SuppressLint("NonConstantResourceId")
                 @Override
-                public void onClick(final View view) {
-                    final PopupMenu popupMenu = new PopupMenu(deleteButton.getContext(), view);
-                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @SuppressLint("NonConstantResourceId")
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            switch (item.getItemId()) {
-                                case R.id.deleteItem: {
-                                    int position = getAdapterPosition();
-                                    helper.deleteTimer(String.valueOf(timerList.get(position).getId()));
-                                    timerList.remove(position);
-                                    notifyItemRemoved(position);
-                                    notifyItemRangeChanged(position, getItemCount() - position);
-                                    onItemDeleteListener.onItemDelete(position);
-                                    return true;
-                                }
-                                case R.id.editItem: {
-                                    onTimerListener.onTimerClick(getAdapterPosition());
-                                    TimerSequence timer = helper.getTimerByID(timerList.get(getAdapterPosition()).getId());
-                                    timerList.set(getAdapterPosition(), timer);
-                                    notifyDataSetChanged();
-                                    return true;
-                                }
-                                default: {
-                                    return false;
-                                }
-
-                            }
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.deleteItem: {
+                            int position = getAdapterPosition();
+                            onItemDeleteListener.onItemDelete(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, getItemCount());
+                            return true;
                         }
-                    });
-
-                    popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-                    try {
-                        Field[] fields = popupMenu.getClass().getDeclaredFields();
-                        for (Field field : fields) {
-                            if ("mPopup".equals(field.getName())) {
-                                field.setAccessible(true);
-                                Object menuPopupHelper = field.get(popupMenu);
-                                Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-                                Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-                                setForceIcons.invoke(menuPopupHelper, true);
-                                break;
-                            }
+                        case R.id.editItem: {
+                            onTimerListener.onTimerClick(getAdapterPosition());
+                            return true;
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        default: {
+                            return false;
+                        }
+
                     }
-
-                    popupMenu.show();
                 }
-            });
+            };
 
+            View.OnClickListener onEditClick = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final PopupMenu popupMenu = new PopupMenu(editButton.getContext(), v);
+                    popupMenu.setOnMenuItemClickListener(onMenuListener);
+                    popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+                    showIcons(popupMenu);
+                    popupMenu.show();
 
+                }
+            };
+
+            editButton.setOnClickListener(onEditClick);
         }
+
+
         @Override
         public void onClick(View view) {
             onTimerListener.onTimerClick(getAdapterPosition());
@@ -207,9 +191,27 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
             onLongClickListener.onLongClick(getAdapterPosition());
             return true;
         }
-
-
     }
+
+    private void showIcons(PopupMenu popupMenu){
+        try {
+            Field[] fields = popupMenu.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                if ("mPopup".equals(field.getName())) {
+                    field.setAccessible(true);
+                    Object menuPopupHelper = field.get(popupMenu);
+                    Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                    Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon",
+                            boolean.class);
+                    setForceIcons.invoke(menuPopupHelper, true);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     interface OnTimerListener {
         void onTimerClick(int position);
