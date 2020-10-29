@@ -30,7 +30,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
 
     private final OnTimerListener mOnTimerListener;
     private final OnItemDeleteListener mOnDeleteListener;
-    private final SQLiteHelper helper;
 
     public void notifyData(ArrayList<TimerSequence> list){
         timerList = list;
@@ -42,7 +41,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
         this.context = context;
         this.timerList = timerList;
         this.mOnTimerListener = onTimerListener;
-        this.helper = new SQLiteHelper(context);
         this.mOnDeleteListener = mOnDeleteListener;
     }
 

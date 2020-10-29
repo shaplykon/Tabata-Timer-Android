@@ -209,9 +209,8 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         final View.OnClickListener confirmButtonListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TimerSequence timer = editableViewModel.saveTimer(type, getApplicationContext());
                 Intent data = new Intent();
-                data.putExtra("timer", timer);
+                data.putExtra("timer", editableViewModel.saveTimer(type, getApplicationContext()));
                 setResult(RESULT_OK, data);
                 finish();
             }

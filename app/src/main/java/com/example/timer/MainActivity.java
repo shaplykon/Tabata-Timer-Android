@@ -124,16 +124,15 @@ public class MainActivity extends AppCompatActivity implements
         if (requestCode == ADD_DATA_REQUEST) {
             if (resultCode == RESULT_OK && data != null) {
                 timerList.add((TimerSequence) data.getSerializableExtra("timer"));
-                //dataAdapter.notifyData(timerList);
                 recyclerView.getAdapter().notifyDataSetChanged();
             }
         } else if (requestCode == EDIT_DATA_REQUEST && resultCode == RESULT_OK && data != null) {
             TimerSequence timer = (TimerSequence) data.getSerializableExtra("timer");
             if (timer != null) {
-                for (int i = 0; i < timerList.size(); i++) {
-                    if (timerList.get(i).getId() == (timer.getId())) {
-                        timerList.set(i, timer);
-                        Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
+                for (int index = 0; index < timerList.size(); index++) {
+                    if (timerList.get(index).getId() == (timer.getId())) {
+                        timerList.set(index, timer);
+                        recyclerView.getAdapter().notifyDataSetChanged();
                         break;
                     }
                 }

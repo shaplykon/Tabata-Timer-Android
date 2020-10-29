@@ -3,7 +3,6 @@ package com.example.timer;
 import java.io.Serializable;
 
 public class TimerSequence implements Serializable {
-
     private int id;
     private String title;
     private int preparationTime;
@@ -120,7 +119,5 @@ public class TimerSequence implements Serializable {
     public int getColor() {
         return color;
     }
-
-
 }
 

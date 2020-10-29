@@ -1,6 +1,5 @@
 package com.example.timer;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.Observer;
@@ -17,10 +16,10 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 public class ActiveActivity extends AppCompatActivity {
-
+    ActiveTimerViewModel activeViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final ActiveTimerViewModel activeViewModel = new ViewModelProvider(this).get(ActiveTimerViewModel.class);
+        activeViewModel = new ViewModelProvider(this).get(ActiveTimerViewModel.class);
         Intent intent = getIntent();
         int id = intent.getIntExtra("id", 0);
         activeViewModel.setTimer(id, this);
@@ -34,26 +33,13 @@ public class ActiveActivity extends AppCompatActivity {
         Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
         startForegroundService(serviceIntent);
 
-        final ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        getSupportActionBar().hide();
 
-        final View background =  findViewById(android.R.id.content);
+
         activeViewModel.currentPhase.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer phase) {
-                if (phase == 0) {
-                    background.setBackgroundColor(ResourcesCompat.getColor(getResources(),R.color.green, null));
-                    window.setStatusBarColor(ResourcesCompat.getColor(getResources(),R.color.darkGreen, null));
-                } else if (!activeViewModel.isRunning) {
-                    background.setBackgroundColor(ResourcesCompat.getColor(getResources(),R.color.purple, null));
-                    window.setStatusBarColor(ResourcesCompat.getColor(getResources(),R.color.darkPurple, null));
-                } else if (phase % 2 == 1) {
-                    background.setBackgroundColor(ResourcesCompat.getColor(getResources(),R.color.red, null));
-                    window.setStatusBarColor(ResourcesCompat.getColor(getResources(),R.color.darkRed, null));
-                } else {
-                    background.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.blue, null));
-                    window.setStatusBarColor(ResourcesCompat.getColor(getResources(), R.color.darkBlue, null));
-                }
+                changeColor(phase);
             }
         });
 
@@ -83,6 +69,24 @@ public class ActiveActivity extends AppCompatActivity {
 
         new ProgressTask().execute();
 
+    }
+
+    private void changeColor(Integer phase) {
+        final View background = findViewById(android.R.id.content);
+        final Window window = this.getWindow();
+        if (phase == 0) {
+            background.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
+            window.setStatusBarColor(ResourcesCompat.getColor(getResources(), R.color.darkGreen, null));
+        } else if (!activeViewModel.isRunning) {
+            background.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.purple, null));
+            window.setStatusBarColor(ResourcesCompat.getColor(getResources(), R.color.darkPurple, null));
+        } else if (phase % 2 == 1) {
+            background.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
+            window.setStatusBarColor(ResourcesCompat.getColor(getResources(), R.color.darkRed, null));
+        } else {
+            background.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.blue, null));
+            window.setStatusBarColor(ResourcesCompat.getColor(getResources(), R.color.darkBlue, null));
+        }
     }
 
     @Override

@@ -3,7 +3,6 @@
     package="com.example.timer">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <application
-
         android:name=".TimerApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -15,7 +14,6 @@
             android:name=".TimerService"
             android:enabled="true"
             android:exported="true" />
-
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
@@ -29,20 +27,12 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity"/>
-        <activity android:name=".ActiveActivity" />
+        <activity
+            android:name=".ActiveActivity"
+
+            />
+
         <activity android:name=".DetailActivity" />
-        <activity android:name=".MainActivity"
-            android:configChanges="locale"
-            >
-
-            <!--
-            <intent-filter>
-                 <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
-        </activity>
+        <activity android:name=".MainActivity"/>
     </application>
-
 </manifest>
