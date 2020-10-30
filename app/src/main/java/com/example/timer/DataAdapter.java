@@ -133,8 +133,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
                 public void onClick(View v) {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, ActiveActivity.class);
-
-                   intent.putExtra("id", timerList.get(getAdapterPosition()).getId());
+                    intent.putExtra("timer", timerList.get(getAdapterPosition()));
                     context.startActivity(intent);
                 }
             });

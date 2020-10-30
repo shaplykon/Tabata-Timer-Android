@@ -27,26 +27,27 @@ public class TaskListFragment extends Fragment {
 
     ListView listView;
     private ActiveTimerViewModel activeViewModel;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         activeViewModel = new ViewModelProvider(requireActivity()).get(ActiveTimerViewModel.class);
+        fillTasksList();
+        adapter = new ArrayAdapter<>(getContext(), R.layout.task_list_item, tasks);
+    }
+
+    private void fillTasksList(){
         int counter = 0;
-
         Resources resources = getResources();
-
-        tasks.add(++counter + ". " + resources.getString(R.string.preparing) + ": " + Objects.requireNonNull(activeViewModel.preparingTime.getValue()).toString());
-        for(int i = 0; i < activeViewModel.setsAmount.getValue(); i++){
-            tasks.add(++counter + ". " + resources.getString(R.string.work) + ": " + Objects.requireNonNull(activeViewModel.workingTime.getValue()).toString());
-            tasks.add(++counter + ". " + resources.getString(R.string.rest) + ": " + Objects.requireNonNull(activeViewModel.restTime.getValue()).toString());
+        tasks.add(++counter + ". " + resources.getString(R.string.preparing) + ": " + activeViewModel.timer.getPreparationTime());
+        for (int i = 0; i < activeViewModel.timer.getSetsAmount(); i++) {
+            tasks.add(++counter + ". " + resources.getString(R.string.work) + ": " + activeViewModel.timer.getWorkingTime());
+            tasks.add(++counter + ". " + resources.getString(R.string.rest) + ": " + activeViewModel.timer.getRestTime());
         }
-        tasks.add(++counter + ". " + resources.getString(R.string.cooldown) + ": " + Objects.requireNonNull(activeViewModel.cooldownTime.getValue()).toString());
+        tasks.add(++counter + ". " + resources.getString(R.string.cooldown) + ": " + activeViewModel.timer.getCooldownTime());
 
         tasks.add(resources.getString(R.string.finish));
-        adapter = new  ArrayAdapter<>(getContext(), R.layout.task_list_item, tasks);
-
-
     }
 
     @Override
@@ -60,7 +61,7 @@ public class TaskListFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (activeViewModel.isRunning) {
+                if (activeViewModel.isRunning.getValue()) {
                     activeViewModel.changePhase(position);
                     listView.smoothScrollToPosition(position);
                 }

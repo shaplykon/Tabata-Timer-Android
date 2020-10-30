@@ -1,65 +1,50 @@
 package com.example.timer;
-import android.content.Context;
-import android.content.Intent;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 
 public class ActiveTimerViewModel extends ViewModel {
-    MutableLiveData<Integer> preparingTime;
-    MutableLiveData<Integer> workingTime;
-    MutableLiveData<Integer> restTime;
-    MutableLiveData<Integer> cyclesAmount;
-    MutableLiveData<Integer> setsAmount;
-    MutableLiveData<Integer> restBetweenSets;
-    MutableLiveData<Integer> cooldownTime;
+    ArrayList<Phase> phaseList = new ArrayList<>();
+    TimerSequence timer;
     MutableLiveData<Integer> counterValue;
     MutableLiveData<Integer> currentPhase;
-    Boolean isRunning;
-    private final ArrayList<Integer> taskArray;
+    MutableLiveData<Boolean> isRunning;
 
-    public ActiveTimerViewModel() {
-        taskArray = new ArrayList<>();
-        preparingTime = new MutableLiveData<>();
-        workingTime = new MutableLiveData<>();
-        restTime = new MutableLiveData<>();
-        cyclesAmount = new MutableLiveData<>();
-        setsAmount = new MutableLiveData<>();
-        restBetweenSets = new MutableLiveData<>();
-        cooldownTime = new MutableLiveData<>();
+
+    public ActiveTimerViewModel(@NonNull TimerSequence timer) {
+        this.timer = timer;
         counterValue = new MutableLiveData<>();
         currentPhase = new MutableLiveData<>();
+        isRunning = new MutableLiveData<>();
+        counterValue.setValue(timer.getPreparationTime());
+        currentPhase.setValue(0);
+        isRunning.setValue(true);
+
+        for (int cycle = 0; cycle < timer.getCyclesAmount(); cycle++) {
+
+            phaseList.add(new Phase(timer.getPreparationTime(), "Preparation"));
+            for (int set = 0; set < timer.getSetsAmount(); set++) {
+                phaseList.add(new Phase(timer.getWorkingTime(), "Work"));
+                phaseList.add(new Phase(timer.getRestTime(), "Rest"));
+            }
+            phaseList.add(new Phase(timer.getCooldownTime(), "Cooldown"));
+        }
     }
 
-    public void setTimer(int id, Context context) {
-        SQLiteHelper dbHelper = new SQLiteHelper(context);
-        TimerSequence timer = dbHelper.getTimerByID(id);
-        preparingTime.setValue(timer.getPreparationTime());
-        workingTime.setValue(timer.getWorkingTime());
-        restTime.setValue(timer.getRestTime());
-        cyclesAmount.setValue(timer.getCyclesAmount());
-        restBetweenSets.setValue(timer.getBetweenSetsRest());
-        cooldownTime.setValue(timer.getCooldownTime());
-        setsAmount.setValue(timer.getSetsAmount());
-        counterValue.setValue(preparingTime.getValue());
-        currentPhase.setValue(0);
-        isRunning = true;
+    public TimerSequence getTimer(){
+        return  timer;
+    }
 
-        for (int k = 0; k < cyclesAmount.getValue(); k++) {
-            taskArray.add(preparingTime.getValue());
-            for (int i = 0; i < setsAmount.getValue(); i++) {
-                taskArray.add(workingTime.getValue());
-                taskArray.add(restTime.getValue());
-            }
-            taskArray.add(cooldownTime.getValue());
-        }
+    public ArrayList<Phase> getPhases(){
+        return phaseList;
     }
 
     public void changePhase(int position){
         currentPhase.setValue(position);
-        counterValue.postValue(taskArray.get(currentPhase.getValue()));
+        counterValue.postValue(phaseList.get(position).getTime());
     }
 
     public void Step() {
@@ -67,10 +52,10 @@ public class ActiveTimerViewModel extends ViewModel {
             counterValue.postValue(counterValue.getValue() - 1);
         } else {
             currentPhase.postValue(currentPhase.getValue() + 1);
-            if (currentPhase.getValue() == taskArray.size()) {
-                isRunning = false;
+            if (currentPhase.getValue() == phaseList.size()) {
+                isRunning.postValue(false);
             } else {
-                counterValue.postValue(taskArray.get(currentPhase.getValue()));
+                counterValue.postValue(phaseList.get(currentPhase.getValue()).getTime());
             }
         }
     }

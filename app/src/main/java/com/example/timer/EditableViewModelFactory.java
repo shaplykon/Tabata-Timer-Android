@@ -14,6 +14,9 @@ public class EditableViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new EditableTimerViewModel(timer);
+        if(modelClass.isAssignableFrom(EditableTimerViewModel.class)){
+            return (T) new EditableTimerViewModel(timer);
+        }
+        throw new IllegalArgumentException("Incorrect ViewModelClass");
     }
 }

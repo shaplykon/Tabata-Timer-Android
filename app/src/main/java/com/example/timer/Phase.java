@@ -1,8 +1,15 @@
 package com.example.timer;
 
-public class Phase {
+import java.io.Serializable;
+
+public class Phase implements Serializable {
     private String name;
     private int time;
+
+    public Phase(int time, String name){
+        this.time = time;
+        this.name = name;
+    }
 
     public String getName() {
         return name;

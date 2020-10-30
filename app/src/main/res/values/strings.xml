@@ -19,7 +19,7 @@
     <string name="rest_time">Rest time</string>
     <string name="working_time">Working time</string>
     <string name="change_color">Change color</string>
-    <string name="current_color">Current color</string>
+    <string name="current_color">Current color:</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <!-- Preference Titles -->
@@ -57,4 +57,6 @@
     <string name="reset_dialog_title">Clear data</string>
     <string name="reset_dialog_message">Are you sure you want to clear all stored data?</string>
     <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="quit_title">Stop timer</string>
 </resources>

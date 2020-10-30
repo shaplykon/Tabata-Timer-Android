@@ -3,6 +3,8 @@ package com.example.timer;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -11,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -30,7 +33,7 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
     TextView setsAmountEdit;
     TextView restBetweenSetsEdit;
     TextView cooldownTimeEdit;
-    View colorView;
+    CardView colorView;
     EditableTimerViewModel editableViewModel;
 
     @SuppressLint("SetTextI18n")
@@ -83,7 +86,7 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         }
         });
 
-        colorView.setBackgroundColor(editableViewModel.color.getValue());
+        colorView.setCardBackgroundColor(editableViewModel.color.getValue());
 
         trainingNameEditText.setText(editableViewModel.title.getValue());
         preparingTimeEdit.setText(editableViewModel.preparingTime.getValue() + "");
@@ -162,8 +165,9 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         editableViewModel.color.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                colorView.setBackgroundColor(integer);
+             colorView.setCardBackgroundColor(integer);
             }
+
         });
 
         View.OnClickListener buttonsClickListener = new View.OnClickListener() {

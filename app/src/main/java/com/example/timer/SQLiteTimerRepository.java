@@ -17,8 +17,8 @@ public class SQLiteTimerRepository implements TimerRepository {
     }
 
     @Override
-    public int update(TimerSequence timer) {
-        return db.update(SQLiteHelper.TABLE_TIMER_NAME, getContentValues(timer), SQLiteHelper.COLUMN_ID + "=" + timer.getId(), null);
+    public void update(TimerSequence timer) {
+        db.update(SQLiteHelper.TABLE_TIMER_NAME, getContentValues(timer), SQLiteHelper.COLUMN_ID + "=" + timer.getId(), null);
     }
 
     @Override

@@ -6,7 +6,7 @@
     <string name="edit">Редактировать</string>
     <string name="add">Добавить</string>
     <string name="delete">Удалить</string>
-    <string name="training_name">Название тренировки</string>
+    <string name="training_name">Название</string>
     <string name="preparing_time">Время подготовки</string>
     <string name="confirm">Подтвердить</string>
     <string name="cooldown_time">Успокоиться</string>
@@ -16,7 +16,7 @@
     <string name="rest_time">Отдых</string>
     <string name="working_time">Работа</string>
     <string name="change_color">Изменить цвет</string>
-    <string name="current_color">Текущий цвет</string>
+    <string name="current_color">Текущий цвет:</string>
     <string name="action_settings">Настройки</string>
     <string name="title_activity_settings">Настройки</string>
     <string name="darkMode">Тёмная тема</string>
@@ -38,4 +38,6 @@
     <string name="reset_dialog_title">Очистка данных</string>
     <string name="reset_dialog_message">Вы уверены, что хотите удалить все сохраненные данные?</string>
     <string name="yes">Да</string>
+    <string name="no">No</string>
+    <string name="quit_title">Остановить таймер</string>
 </resources>
