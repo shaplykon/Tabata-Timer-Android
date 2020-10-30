@@ -20,21 +20,12 @@ import java.util.concurrent.TimeUnit;
 
 
 public class TimerService extends Service {
-
-
     ExecutorService executorService;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        executorService = Executors.newFixedThreadPool(1);
-    }
 
-    public TimerService() {
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
         createNotificationChannel();
         Intent intent1 = new Intent(this, ActiveActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, 0);
@@ -44,11 +35,21 @@ public class TimerService extends Service {
                 .setContentIntent(pendingIntent).build();
 
         startForeground(1, notification);
-        getApplicationContext();
+    }
+
+    public TimerService() {
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (executorService != null) {
+            executorService.shutdownNow();
+        }
+        executorService = Executors.newFixedThreadPool(1);
         TimerSequence timer = (TimerSequence) intent.getSerializableExtra("timer");
         ArrayList<Phase> phases = (ArrayList<Phase>) intent.getSerializableExtra("phases");
-      //  int phase = intent.getIntExtra("phase", 0);
-        TimerRun timerRun = new TimerRun(timer, phases, getApplicationContext());
+        int phase = intent.getIntExtra("phase", 0);
+        TimerRun timerRun = new TimerRun(timer, phases, phase, getApplicationContext());
         executorService.execute(timerRun);
 
         return START_STICKY;
@@ -89,11 +90,11 @@ class TimerRun implements Runnable{
     int currentPhase;
     int counterValue;
 
-    public TimerRun(TimerSequence timer, ArrayList<Phase> phases,  Context context){
+    public TimerRun(TimerSequence timer, ArrayList<Phase> phases, int currentPhase , Context context){
         this.timer = timer;
         this.phases = phases;
         this.context = context;
-        currentPhase = 0;
+        this.currentPhase = currentPhase;
         counterValue = phases.get(currentPhase).getTime();
 
     }
@@ -125,18 +126,14 @@ class TimerRun implements Runnable{
             case ActiveActivity.COMMAND_TICK:{
                 break;
             }
-
-
             case ActiveActivity.COMMAND_CHANGE:{
                 playSound();
                 intent.putExtra(ActiveActivity.ARG_PHASE, currentPhase);
                 intent.putExtra(ActiveActivity.ARG_COUNTER, counterValue);
             }
-
             case ActiveActivity.COMMAND_STOP:{
                 break;
             }
-
         }
     }
 
@@ -153,7 +150,6 @@ class TimerRun implements Runnable{
                 mediaPlayer.start();
                 break;
             }
-
         }
     }
 

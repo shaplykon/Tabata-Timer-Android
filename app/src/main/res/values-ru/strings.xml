@@ -10,7 +10,7 @@
     <string name="preparing_time">Время подготовки</string>
     <string name="confirm">Подтвердить</string>
     <string name="cooldown_time">Успокоиться</string>
-    <string name="rest_between_sets">Отдых между сетами</string>
+    <string name="rest_between_sets">Отдых между циклами</string>
     <string name="sets_amount">Количество сетов</string>
     <string name="cycles_amount">Количество циклов</string>
     <string name="rest_time">Отдых</string>
@@ -40,4 +40,5 @@
     <string name="yes">Да</string>
     <string name="no">No</string>
     <string name="quit_title">Остановить таймер</string>
+    <string name="rest_between_cycles">Отдых между циклами</string>
 </resources>

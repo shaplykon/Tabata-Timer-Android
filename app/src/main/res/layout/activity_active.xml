@@ -9,8 +9,10 @@
     <fragment
         android:id="@+id/fragment"
         android:name="com.example.timer.CounterFragment"
-        android:layout_width="404dp"
-        android:layout_height="350dp"
+        android:layout_width="373dp"
+        android:layout_height="304dp"
+        android:layout_marginTop="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -19,11 +21,90 @@
     <fragment
         android:id="@+id/fragment2"
         android:name="com.example.timer.TaskListFragment"
-        android:layout_width="404dp"
-        android:layout_height="297dp"
-        android:layout_marginTop="72dp"
+        android:layout_width="385dp"
+        android:layout_height="365dp"
+        android:layout_marginTop="30dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.428"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment" />
+
+    <ImageButton
+        android:id="@+id/prevButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="33dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment2"
+        app:srcCompat="@android:drawable/ic_media_previous" />
+
+    <ImageButton
+        android:id="@+id/nextButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="33dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment2"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@android:drawable/ic_media_next" />
+
+    <TextView
+        android:id="@+id/stageText"
+        android:layout_width="209dp"
+        android:layout_height="59dp"
+        android:layout_marginTop="32dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/nextButton"
+        app:layout_constraintStart_toEndOf="@+id/prevButton"
+        app:layout_constraintTop_toBottomOf="@+id/fragment2" />
+
+    <ImageView
+        android:id="@+id/pauseButton"
+        android:layout_width="78dp"
+        android:layout_height="78dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="4dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_media_pause" />
+
+    <TextView
+        android:id="@+id/stageName"
+        android:layout_width="265dp"
+        android:layout_height="78dp"
+        android:layout_marginTop="28dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:textSize="50sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:layout_width="78dp"
+        android:layout_height="78dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/abc_vector_test" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,6 @@
 package com.example.timer;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -33,15 +35,22 @@ public class TaskListFragment extends Fragment {
     private void fillTasksList(){
         int counter = 0;
         Resources resources = getResources();
-        tasks.add(++counter + ". " + resources.getString(R.string.preparing) + ": " + activeViewModel.timer.getPreparationTime());
-        for (int i = 0; i < activeViewModel.timer.getSetsAmount(); i++) {
-            tasks.add(++counter + ". " + resources.getString(R.string.work) + ": " + activeViewModel.timer.getWorkingTime());
-            tasks.add(++counter + ". " + resources.getString(R.string.rest) + ": " + activeViewModel.timer.getRestTime());
-        }
-        tasks.add(++counter + ". " + resources.getString(R.string.cooldown) + ": " + activeViewModel.timer.getCooldownTime());
+        for (int cycleId = 0; cycleId < activeViewModel.timer.getCyclesAmount(); cycleId++) {
+            tasks.add(++counter + ". " + resources.getString(R.string.preparing) + ": " + activeViewModel.timer.getPreparationTime());
+            for (int setId = 0; setId < activeViewModel.timer.getSetsAmount(); setId++) {
+                tasks.add(++counter + ". " + resources.getString(R.string.work) + ": " + activeViewModel.timer.getWorkingTime());
+                tasks.add(++counter + ". " + resources.getString(R.string.rest) + ": " + activeViewModel.timer.getRestTime());
+            }
+            tasks.add(++counter + ". " + resources.getString(R.string.cooldown)
+                    + ": " + activeViewModel.timer.getCooldownTime());
 
+            tasks.add(++counter + ". " + resources.getString(R.string.rest_between_cycles) +
+                    ": " + activeViewModel.timer.getBetweenSetsRest());
+        }
+        tasks.remove(tasks.size() - 1);
         tasks.add(resources.getString(R.string.finish));
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,7 +66,23 @@ public class TaskListFragment extends Fragment {
                 if (activeViewModel.isRunning.getValue()) {
                     activeViewModel.changePhase(position);
                     listView.smoothScrollToPosition(position);
+
                 }
+            }
+        });
+
+
+
+        listView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @SuppressLint("ResourceAsColor")
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                listView.getChildAt(position).setBackgroundColor(R.color.darkGreen);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 

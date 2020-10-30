@@ -1,5 +1,6 @@
 package com.example.timer;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,8 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,10 +36,13 @@ public class ActiveActivity extends AppCompatActivity {
     public final static String PARAM_COMMAND = "command";
 
     ActiveTimerViewModel activeViewModel;
-
-
     TimerReceiver broadcastReceiver;
 
+    TextView stageNameText;
+    TextView stageText;
+    ImageButton buttonPrev;
+    ImageButton buttonNext;
+    ImageButton buttonBack;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -50,6 +58,23 @@ public class ActiveActivity extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
 
+        stageNameText = findViewById(R.id.stageName);
+        stageText = findViewById(R.id.stageText);
+
+        buttonPrev = findViewById(R.id.prevButton);
+        buttonNext = findViewById(R.id.nextButton);
+        buttonBack = findViewById(R.id.backButton);
+
+        buttonBack.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        buttonPrev.setOnClickListener(navigationButtonOnClick);
+        buttonNext.setOnClickListener(navigationButtonOnClick);
+
         getSupportActionBar().hide();
 
 
@@ -57,27 +82,7 @@ public class ActiveActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int command = intent.getIntExtra(PARAM_COMMAND, 0);
-
-                switch (command){
-                    case COMMAND_TICK:{
-                        activeViewModel.counterValue.postValue(activeViewModel.counterValue.getValue() - 1);
-                        break;
-                    }
-
-                    case COMMAND_STOP:{
-                        activeViewModel.isRunning.postValue(false);
-                        break;
-                    }
-
-                    case COMMAND_CHANGE:{
-                        activeViewModel.currentPhase.
-                                postValue(intent.getIntExtra(ActiveActivity.ARG_PHASE, 0));
-
-                        activeViewModel.counterValue.
-                                postValue(intent.getIntExtra(ActiveActivity.ARG_COUNTER, 0));
-                        break;
-                    }
-                }
+                handleReceiver(command, intent);
             }
         };
 
@@ -87,7 +92,6 @@ public class ActiveActivity extends AppCompatActivity {
         final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
         serviceIntent.putExtra("timer", activeViewModel.getTimer());
         serviceIntent.putExtra("phases", activeViewModel.getPhases());
-        //serviceIntent.putExtra("phase", 0);
         startService(serviceIntent);
 
         activeViewModel.isRunning.observe(this, new Observer<Boolean>() {
@@ -101,8 +105,14 @@ public class ActiveActivity extends AppCompatActivity {
         });
 
         activeViewModel.currentPhase.observe(this, new Observer<Integer>() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onChanged(Integer phase) {
+                ListView lv = findViewById(R.id.list_view);
+                lv.setSelection(phase);
+
+                stageText.setText((phase+1) + "/" + (activeViewModel.phaseList.size()));
+                stageNameText.setText(activeViewModel.phaseList.get(phase).getName());
                 changeColor(phase);
                 Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
                 serviceIntent.putExtra("timer", activeViewModel.getTimer());
@@ -113,6 +123,47 @@ public class ActiveActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    OnClickListener navigationButtonOnClick = new OnClickListener() {
+        @SuppressLint("NonConstantResourceId")
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.prevButton:{
+                    activeViewModel.changePhase(activeViewModel.currentPhase.getValue() - 1);
+                }
+
+                case R.id.nextButton:{
+                    activeViewModel.changePhase(activeViewModel.currentPhase.getValue() + 1);
+                }
+
+            }
+        }
+    };
+
+    private void handleReceiver(int command, Intent intent){
+
+        switch (command){
+            case COMMAND_TICK:{
+                activeViewModel.counterValue.postValue(activeViewModel.counterValue.getValue() - 1);
+                break;
+            }
+
+            case COMMAND_STOP:{
+                activeViewModel.isRunning.postValue(false);
+                break;
+            }
+
+            case COMMAND_CHANGE:{
+                activeViewModel.currentPhase.
+                        postValue(intent.getIntExtra(ActiveActivity.ARG_PHASE, 0));
+
+                activeViewModel.counterValue.
+                        postValue(intent.getIntExtra(ActiveActivity.ARG_COUNTER, 0));
+                break;
+            }
+        }
     }
 
     @Override
@@ -156,7 +207,7 @@ public class ActiveActivity extends AppCompatActivity {
             Phase currentPhase = activeViewModel.phaseList.get(phase);
 
             switch (currentPhase.getName()) {
-                case "Preparation": {
+                case "Preparing": {
                     background.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
                     window.setStatusBarColor(ResourcesCompat.getColor(getResources(), R.color.darkGreen, null));
                     break;

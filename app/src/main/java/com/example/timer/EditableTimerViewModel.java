@@ -36,7 +36,7 @@ public class EditableTimerViewModel extends ViewModel {
         return new TimerSequence(id.getValue(), title.getValue(),
                 preparingTime.getValue(), workingTime.getValue(),
                 restTime.getValue(), cyclesAmount.getValue(),
-                restBetweenSets.getValue(), setsAmount.getValue(),
+                setsAmount.getValue(),restBetweenSets.getValue(),
                 cooldownTime.getValue(), color.getValue());
 
     }

@@ -25,13 +25,15 @@ public class ActiveTimerViewModel extends ViewModel {
 
         for (int cycle = 0; cycle < timer.getCyclesAmount(); cycle++) {
 
-            phaseList.add(new Phase(timer.getPreparationTime(), "Preparation"));
+            phaseList.add(new Phase(timer.getPreparationTime(), "Preparing"));
             for (int set = 0; set < timer.getSetsAmount(); set++) {
                 phaseList.add(new Phase(timer.getWorkingTime(), "Work"));
                 phaseList.add(new Phase(timer.getRestTime(), "Rest"));
             }
             phaseList.add(new Phase(timer.getCooldownTime(), "Cooldown"));
+            phaseList.add(new Phase(timer.getBetweenSetsRest(), "Rest"));
         }
+        phaseList.remove(phaseList.size() - 1);
     }
 
     public TimerSequence getTimer(){

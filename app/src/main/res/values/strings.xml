@@ -13,7 +13,7 @@
     <string name="plus" translatable="false">+</string>
     <string name="confirm">Confirm</string>
     <string name="cooldown_time">Cooldown time</string>
-    <string name="rest_between_sets">Rest between sets</string>
+    <string name="rest_between_sets">Rest between cycles</string>
     <string name="sets_amount">Sets amount</string>
     <string name="cycles_amount">Cycles amount</string>
     <string name="rest_time">Rest time</string>
@@ -59,4 +59,5 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="quit_title">Stop timer</string>
+    <string name="rest_between_cycles">Rest between cycles</string>
 </resources>
