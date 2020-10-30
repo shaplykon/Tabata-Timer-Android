@@ -1,12 +1,8 @@
 package com.example.timer;
 
-import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-
-import java.util.Timer;
 
 public class ActiveViewModelFactory implements ViewModelProvider.Factory {
 

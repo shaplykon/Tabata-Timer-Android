@@ -1,12 +1,6 @@
 package com.example.timer;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,11 +9,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 
 public class ActiveActivity extends AppCompatActivity {
     public final static int  COMMAND_TICK = 100;
+    public final static int  COMMAND_STOP = 200;
+    public final static int  COMMAND_CHANGE = 300;
+
+    public final static String  ARG_PHASE = "phase";
+    public final static String  ARG_COUNTER = "counter";
+
 
     public final static String BROADCAST_ACTION = "broadcast";
 
@@ -28,7 +33,7 @@ public class ActiveActivity extends AppCompatActivity {
     ActiveTimerViewModel activeViewModel;
 
 
-    BroadcastReceiver broadcastReceiver;
+    TimerReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +53,28 @@ public class ActiveActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
 
-        broadcastReceiver = new BroadcastReceiver() {
+        broadcastReceiver = new TimerReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int command = intent.getIntExtra(PARAM_COMMAND, 0);
 
                 switch (command){
                     case COMMAND_TICK:{
-                        activeViewModel.Step();
+                        activeViewModel.counterValue.postValue(activeViewModel.counterValue.getValue() - 1);
+                        break;
+                    }
+
+                    case COMMAND_STOP:{
+                        activeViewModel.isRunning.postValue(false);
+                        break;
+                    }
+
+                    case COMMAND_CHANGE:{
+                        activeViewModel.currentPhase.
+                                postValue(intent.getIntExtra(ActiveActivity.ARG_PHASE, 0));
+
+                        activeViewModel.counterValue.
+                                postValue(intent.getIntExtra(ActiveActivity.ARG_COUNTER, 0));
                         break;
                     }
                 }
@@ -65,15 +84,31 @@ public class ActiveActivity extends AppCompatActivity {
         IntentFilter intentFilter  = new IntentFilter(BROADCAST_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
 
-        Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+        final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
         serviceIntent.putExtra("timer", activeViewModel.getTimer());
         serviceIntent.putExtra("phases", activeViewModel.getPhases());
+        //serviceIntent.putExtra("phase", 0);
         startService(serviceIntent);
+
+        activeViewModel.isRunning.observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isRunning) {
+                if(!isRunning){
+                    stopService(new Intent(serviceIntent));
+                    Toast.makeText(ActiveActivity.this, R.string.training_end, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         activeViewModel.currentPhase.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer phase) {
                 changeColor(phase);
+                Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+                serviceIntent.putExtra("timer", activeViewModel.getTimer());
+                serviceIntent.putExtra("phases", activeViewModel.getPhases());
+                serviceIntent.putExtra("phase", phase);
+                startService(serviceIntent);
             }
         });
 
@@ -82,7 +117,13 @@ public class ActiveActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        openQuitDialog();
+        if(activeViewModel.isRunning.getValue()){
+            openQuitDialog();
+        }
+        else{
+            super.onBackPressed();
+        }
+
     }
 
     private void openQuitDialog() {

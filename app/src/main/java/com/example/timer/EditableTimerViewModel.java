@@ -1,10 +1,9 @@
 package com.example.timer;
 
 import android.content.Context;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import java.util.Timer;
 
 
 public class EditableTimerViewModel extends ViewModel {

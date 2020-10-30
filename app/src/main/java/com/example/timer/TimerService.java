@@ -6,7 +6,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 
 import androidx.core.app.NotificationCompat;
@@ -42,17 +44,21 @@ public class TimerService extends Service {
                 .setContentIntent(pendingIntent).build();
 
         startForeground(1, notification);
-
+        getApplicationContext();
         TimerSequence timer = (TimerSequence) intent.getSerializableExtra("timer");
         ArrayList<Phase> phases = (ArrayList<Phase>) intent.getSerializableExtra("phases");
-        TimerRun timerRun = new TimerRun(timer, phases);
+      //  int phase = intent.getIntExtra("phase", 0);
+        TimerRun timerRun = new TimerRun(timer, phases, getApplicationContext());
         executorService.execute(timerRun);
 
         return START_STICKY;
     }
 
+
+
     @Override
     public void onDestroy() {
+        executorService.shutdownNow();
         stopForeground(true);
         stopSelf();
         super.onDestroy();
@@ -78,24 +84,93 @@ public class TimerService extends Service {
 class TimerRun implements Runnable{
     TimerSequence timer;
     ArrayList<Phase> phases;
+    Context context;
+    MediaPlayer mediaPlayer;
+    int currentPhase;
+    int counterValue;
 
-    public TimerRun(TimerSequence timer, ArrayList<Phase> phases){
+    public TimerRun(TimerSequence timer, ArrayList<Phase> phases,  Context context){
         this.timer = timer;
         this.phases = phases;
+        this.context = context;
+        currentPhase = 0;
+        counterValue = phases.get(currentPhase).getTime();
+
     }
 
     @Override
     public void run() {
-        Intent intent = new Intent(ActiveActivity.BROADCAST_ACTION);
         try {
-            TimeUnit.SECONDS.sleep(1);
-            intent.putExtra(ActiveActivity.PARAM_COMMAND, ActiveActivity.COMMAND_TICK);
-
-            // sendBroadcast(intent);
-
+            startCycle();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
 
+    public void startCycle() throws InterruptedException {
+        Intent intent = new Intent(ActiveActivity.BROADCAST_ACTION);
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        while (currentPhase <= phases.size()) {
+            TimeUnit.SECONDS.sleep(1);
+            int command = Step();
+            handleCommand(command, intent);
+            intent.putExtra(ActiveActivity.PARAM_COMMAND, command);
+            context.sendBroadcast(intent);
+        }
+
+    }
+
+    private void handleCommand(int command, Intent intent){
+        switch (command){
+            case ActiveActivity.COMMAND_TICK:{
+                break;
+            }
+
+
+            case ActiveActivity.COMMAND_CHANGE:{
+                playSound();
+                intent.putExtra(ActiveActivity.ARG_PHASE, currentPhase);
+                intent.putExtra(ActiveActivity.ARG_COUNTER, counterValue);
+            }
+
+            case ActiveActivity.COMMAND_STOP:{
+                break;
+            }
+
+        }
+    }
+
+    private void playSound(){
+        switch (phases.get(currentPhase).getName()){
+            case "Work":{
+                mediaPlayer = MediaPlayer.create(context, R.raw.whistling);
+                mediaPlayer.start();
+                break;
+            }
+            case "Cooldown":
+            case "Rest":{
+                mediaPlayer = MediaPlayer.create(context, R.raw.gong);
+                mediaPlayer.start();
+                break;
+            }
+
+        }
+    }
+
+    private int Step(){
+        if (counterValue > 1) {
+            counterValue--;
+            return ActiveActivity.COMMAND_TICK;
+        } else {
+            currentPhase++;
+            if (currentPhase == phases.size()) {
+                mediaPlayer = MediaPlayer.create(context, R.raw.finish);
+                mediaPlayer.start();
+                return ActiveActivity.COMMAND_STOP;
+            } else {
+                counterValue = phases.get(currentPhase).getTime();
+                return ActiveActivity.COMMAND_CHANGE;
+            }
+        }
     }
 }

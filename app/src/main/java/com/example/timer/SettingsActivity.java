@@ -1,13 +1,11 @@
 package com.example.timer;
 
-import android.os.Bundle;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.util.DisplayMetrics;
-
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -151,11 +149,6 @@ public class SettingsActivity extends AppCompatActivity implements OnDataReset{
             setPreferencesFromResource(R.xml.settings, rootKey);
         }
     }
-
-
-
-
-
 }
 
 interface OnDataReset{

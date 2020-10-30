@@ -47,16 +47,4 @@ public class ActiveTimerViewModel extends ViewModel {
         counterValue.postValue(phaseList.get(position).getTime());
     }
 
-    public void Step() {
-        if (counterValue.getValue() > 0) {
-            counterValue.postValue(counterValue.getValue() - 1);
-        } else {
-            currentPhase.postValue(currentPhase.getValue() + 1);
-            if (currentPhase.getValue() == phaseList.size()) {
-                isRunning.postValue(false);
-            } else {
-                counterValue.postValue(phaseList.get(currentPhase.getValue()).getTime());
-            }
-        }
-    }
 }
