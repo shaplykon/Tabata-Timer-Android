@@ -28,7 +28,6 @@ public class SettingsActivity extends AppCompatActivity implements OnDataReset{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
-      //  onDataReset = (OnDataReset) getCallingActivity();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor = sharedPreferences.edit();
         settingsFragment = new SettingsFragment();
