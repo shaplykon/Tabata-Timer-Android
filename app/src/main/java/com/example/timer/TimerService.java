@@ -9,9 +9,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.IBinder;
-
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
@@ -21,7 +20,29 @@ import java.util.concurrent.TimeUnit;
 
 
 public class TimerService extends Service {
+    private final int NOTIFICATION_ID = 1;
+
     ExecutorService executorService;
+    NotificationManager notificationManager;
+    NotificationCompat.Builder notificationBuilder;
+
+    IBinder mBinder = new LocalBinder();
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    public class LocalBinder extends Binder {
+        public TimerService getServerInstance() {
+            return TimerService.this;
+        }
+    }
+
+    public void hideNotification(){
+        stopSelf();
+        notificationManager.cancel(NOTIFICATION_ID);
+    }
 
     @Override
     public void onCreate() {
@@ -31,15 +52,16 @@ public class TimerService extends Service {
         Intent intent = new Intent(this, ActiveActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        Notification notification = new NotificationCompat.Builder(this, "TimerChannel")
+
+        notificationBuilder = new NotificationCompat.Builder(this, "TimerChannel")
                 .setContentTitle(getResources().getString(R.string.notification_title))
                 .setContentText(getResources().getString(R.string.notification_text))
                 .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                .setContentIntent(pendingIntent).build();
-
-        startForeground(1, notification);
+                .setContentIntent(pendingIntent);
+        Notification notification = notificationBuilder.build();
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     public TimerService() {
@@ -57,21 +79,17 @@ public class TimerService extends Service {
         ArrayList<Phase> phases = (ArrayList<Phase>) intent.getSerializableExtra("phases");
         int phase = intent.getIntExtra(ActiveActivity.ARG_PHASE, 0);
         int counterValue = intent.getIntExtra(ActiveActivity.ARG_COUNTER, 0);
-        TimerRun timerRun = new TimerRun(timer, phases, phase, counterValue, getApplicationContext());
+        TimerRun timerRun = new TimerRun(timer, phases, phase, counterValue,
+                getApplicationContext(), notificationBuilder, notificationManager);
         executorService.execute(timerRun);
 
         return START_STICKY;
     }
 
-
-
-
     @Override
     public void onDestroy() {
         executorService.shutdownNow();
         stopSelf();
-        stopForeground(true);
-
     }
 
     private void createNotificationChannel() {
@@ -83,12 +101,6 @@ public class TimerService extends Service {
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(notificationChannel);
     }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 }
 
 class TimerRun implements Runnable{
@@ -96,16 +108,43 @@ class TimerRun implements Runnable{
     ArrayList<Phase> phases;
     Context context;
     MediaPlayer mediaPlayer;
+
+    NotificationCompat.Builder builder;
+    NotificationManager notificationManager;
+
     int currentPhase;
     int counterValue;
+    int progress;
+    int progressMax;
 
     public TimerRun(TimerSequence timer, ArrayList<Phase> phases,
-                    int currentPhase, int counterValue, Context context){
+                    int currentPhase, int counterValue, Context context,
+                    NotificationCompat.Builder builder, NotificationManager notificationManager){
+        this.notificationManager = notificationManager;
+        this.builder = builder;
         this.timer = timer;
         this.phases = phases;
         this.context = context;
         this.currentPhase = currentPhase;
         this.counterValue = counterValue != 0 ? counterValue : phases.get(currentPhase).getTime();
+        this.progressMax = getMaxProgress();
+        this.progress = getCurrentProgress(currentPhase);
+    }
+
+    private int getCurrentProgress(int currentPhase){
+        int progress = progressMax;
+        for(int phaseId = phases.size() - 1; phaseId >= currentPhase; phaseId--){
+            progress -= phases.get(phaseId).getTime();
+        }
+        return progress;
+    }
+
+    private int getMaxProgress() {
+        int maxProgress = 0;
+        for(Phase phase:phases){
+            maxProgress += phase.getTime();
+        }
+        return maxProgress;
     }
 
     @Override
@@ -126,8 +165,10 @@ class TimerRun implements Runnable{
             handleCommand(command, intent);
             intent.putExtra(ActiveActivity.PARAM_COMMAND, command);
             context.sendBroadcast(intent);
+            progress +=  1;
+            builder.setProgress(progressMax, progress, false);
+            notificationManager.notify(1, builder.build());
         }
-
     }
 
     private void handleCommand(int command, Intent intent){
@@ -143,8 +184,12 @@ class TimerRun implements Runnable{
                 playSound();
                 intent.putExtra(ActiveActivity.ARG_PHASE, currentPhase);
                 intent.putExtra(ActiveActivity.ARG_COUNTER, counterValue);
+                break;
             }
             case ActiveActivity.COMMAND_STOP:{
+                builder.setProgress(0, 0, false)
+                .setContentText("Тренировка завершена");
+                notificationManager.notify(1, builder.build());
                 break;
             }
         }

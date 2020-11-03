@@ -2,12 +2,15 @@ package com.example.timer;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -41,6 +44,8 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
 
     public final static String PARAM_COMMAND = "command";
 
+    TimerService timerService;
+
     ActiveTimerViewModel activeViewModel;
     TimerReceiver broadcastReceiver;
 
@@ -64,7 +69,6 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         TimerSequence timer = (TimerSequence) intent.getSerializableExtra("timer");
         ArrayList<Phase> phaseList = sqLitePhaseRepository.get(timer.getId());
         activeViewModel = new ViewModelProvider(this, new ActiveViewModelFactory(timer, phaseList)).get(ActiveTimerViewModel.class);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_active);
 
@@ -87,20 +91,10 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         buttonPause.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
-                if (!activeViewModel.isPaused.getValue()) {
-                    activeViewModel.isPaused.setValue(true);
-
-                } else {
-                    activeViewModel.isPaused.setValue(false);
-
-                }
+                activeViewModel.isPaused.setValue(!activeViewModel.isPaused.getValue());
                 buttonPause.setBackgroundColor(80000000);
-
             }
         });
-
-
 
         buttonBack.setOnClickListener(new OnClickListener() {
             @Override
@@ -116,6 +110,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int command = intent.getIntExtra(PARAM_COMMAND, 0);
+
                 handleReceiver(command, intent);
             }
         };
@@ -139,6 +134,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
                         serviceIntent.putExtra(ARG_PHASE, activeViewModel.currentPhase.getValue());
                         serviceIntent.putExtra(ARG_COUNTER, activeViewModel.counterValue.getValue());
                         startService(serviceIntent);
+                        bindService(serviceIntent, mConnection, BIND_ADJUST_WITH_ACTIVITY);
                         buttonPause.setImageResource(R.drawable.pause);
                     }
                 }
@@ -227,6 +223,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         quitDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                timerService.hideNotification();
                 finish();
             }
         });
@@ -240,6 +237,20 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
 
         quitDialog.show();
     }
+
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            timerService = null;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            TimerService.LocalBinder mLocalBinder = (TimerService.LocalBinder)service;
+            timerService = mLocalBinder.getServerInstance();
+        }
+    };
 
     private void changeColor(Integer phase) {
         final View background = findViewById(android.R.id.content);
