@@ -134,6 +134,9 @@ public class SettingsActivity extends AppCompatActivity implements OnDataReset{
                 return true;
             }
         });
+
+        Preference versionPreference = settingsFragment.findPreference("versionName");
+        versionPreference.setSummary(BuildConfig.VERSION_NAME);
         super.onResume();
     }
 

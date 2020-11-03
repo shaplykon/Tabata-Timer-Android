@@ -44,4 +44,5 @@
     <string name="notification_title">Таймер</string>
     <string name="notification_text">Таймер на стадии выполнения</string>
     <string name="delete_title">Удалить таймер</string>
+    <string name="version_name">Версия приложения</string>
 </resources>

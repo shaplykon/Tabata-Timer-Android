@@ -63,4 +63,5 @@
     <string name="notification_title">Timer notification</string>
     <string name="notification_text">Timer is running now</string>
     <string name="delete_title">Delete timer</string>
+    <string name="version_name">Application version</string>
 </resources>
