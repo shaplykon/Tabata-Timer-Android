@@ -42,7 +42,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="text"
                 android:text=""
                 android:textAlignment="center" />
@@ -81,7 +80,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="number"
                 android:text=""
                 android:textAlignment="center" />
@@ -127,7 +125,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="number"
                 android:text=""
                 android:textAlignment="center" />
@@ -173,7 +170,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="number"
                 android:text=""
                 android:textAlignment="center" />
@@ -219,7 +215,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="number"
                 android:text=""
                 android:textAlignment="center" />
@@ -265,7 +260,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="number"
                 android:text=""
                 android:textAlignment="center" />
@@ -311,7 +305,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="number"
                 android:text=""
                 android:textAlignment="center" />
@@ -357,7 +350,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:autofillHints=""
-                android:focusableInTouchMode="false"
                 android:inputType="number"
                 android:text=""
                 android:textAlignment="center" />

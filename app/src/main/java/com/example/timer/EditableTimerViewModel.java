@@ -38,22 +38,21 @@ public class EditableTimerViewModel extends ViewModel {
                 restTime.getValue(), cyclesAmount.getValue(),
                 setsAmount.getValue(),restBetweenSets.getValue(),
                 cooldownTime.getValue(), color.getValue());
-
     }
 
     public TimerSequence saveTimer(String type, Context context) {
         SQLiteTimerRepository timerRepository = new SQLiteTimerRepository(context);
+        SQLitePhaseRepository phaseRepository = new SQLitePhaseRepository(context);
         TimerSequence timer = getTimer();
         if (type.equals("edit")) {
             timerRepository.update(timer);
+            phaseRepository.update(timer);
         }
         else {
             timer.setId(timerRepository.insert(timer));
+            phaseRepository.insert(timer);
         }
         return timer;
-
     }
-
-
 }
 

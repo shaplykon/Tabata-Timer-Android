@@ -60,4 +60,7 @@
     <string name="no">No</string>
     <string name="quit_title">Stop timer</string>
     <string name="rest_between_cycles">Rest between cycles</string>
+    <string name="notification_title">Timer notification</string>
+    <string name="notification_text">Timer is running now</string>
+    <string name="delete_title">Delete timer</string>
 </resources>

@@ -38,7 +38,10 @@
     <string name="reset_dialog_title">Очистка данных</string>
     <string name="reset_dialog_message">Вы уверены, что хотите удалить все сохраненные данные?</string>
     <string name="yes">Да</string>
-    <string name="no">No</string>
+    <string name="no">Нет</string>
     <string name="quit_title">Остановить таймер</string>
     <string name="rest_between_cycles">Отдых между циклами</string>
+    <string name="notification_title">Таймер</string>
+    <string name="notification_text">Таймер на стадии выполнения</string>
+    <string name="delete_title">Удалить таймер</string>
 </resources>

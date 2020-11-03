@@ -3,13 +3,19 @@ package com.example.timer;
 import java.io.Serializable;
 
 public class Phase implements Serializable {
+    private int id;
     private String name;
     private int time;
 
-    public Phase(int time, String name){
+    public Phase(int id, int time, String name){
+        this.id = id;
         this.time = time;
         this.name = name;
     }
+
+    public int getId(){return id;}
+
+    public void setId(int Id){this.id = Id;}
 
     public String getName() {
         return name;

@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
@@ -27,11 +28,15 @@ public class TimerService extends Service {
         super.onCreate();
 
         createNotificationChannel();
-        Intent intent1 = new Intent(this, ActiveActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, 0);
+        Intent intent = new Intent(this, ActiveActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         Notification notification = new NotificationCompat.Builder(this, "TimerChannel")
-                .setContentTitle("Timer notification")
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle(getResources().getString(R.string.notification_title))
+                .setContentText(getResources().getString(R.string.notification_text))
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setContentIntent(pendingIntent).build();
 
         startForeground(1, notification);
@@ -45,11 +50,14 @@ public class TimerService extends Service {
         if (executorService != null) {
             executorService.shutdownNow();
         }
+
         executorService = Executors.newFixedThreadPool(1);
+
         TimerSequence timer = (TimerSequence) intent.getSerializableExtra("timer");
         ArrayList<Phase> phases = (ArrayList<Phase>) intent.getSerializableExtra("phases");
-        int phase = intent.getIntExtra("phase", 0);
-        TimerRun timerRun = new TimerRun(timer, phases, phase, getApplicationContext());
+        int phase = intent.getIntExtra(ActiveActivity.ARG_PHASE, 0);
+        int counterValue = intent.getIntExtra(ActiveActivity.ARG_COUNTER, 0);
+        TimerRun timerRun = new TimerRun(timer, phases, phase, counterValue, getApplicationContext());
         executorService.execute(timerRun);
 
         return START_STICKY;
@@ -57,12 +65,13 @@ public class TimerService extends Service {
 
 
 
+
     @Override
     public void onDestroy() {
         executorService.shutdownNow();
-        stopForeground(true);
         stopSelf();
-        super.onDestroy();
+        stopForeground(true);
+
     }
 
     private void createNotificationChannel() {
@@ -90,13 +99,13 @@ class TimerRun implements Runnable{
     int currentPhase;
     int counterValue;
 
-    public TimerRun(TimerSequence timer, ArrayList<Phase> phases, int currentPhase , Context context){
+    public TimerRun(TimerSequence timer, ArrayList<Phase> phases,
+                    int currentPhase, int counterValue, Context context){
         this.timer = timer;
         this.phases = phases;
         this.context = context;
         this.currentPhase = currentPhase;
-        counterValue = phases.get(currentPhase).getTime();
-
+        this.counterValue = counterValue != 0 ? counterValue : phases.get(currentPhase).getTime();
     }
 
     @Override
@@ -124,6 +133,10 @@ class TimerRun implements Runnable{
     private void handleCommand(int command, Intent intent){
         switch (command){
             case ActiveActivity.COMMAND_TICK:{
+                if (counterValue >= 0 && counterValue <= 3){
+                    mediaPlayer = MediaPlayer.create(context, R.raw.tick);
+                    mediaPlayer.start();
+                }
                 break;
             }
             case ActiveActivity.COMMAND_CHANGE:{
@@ -163,10 +176,11 @@ class TimerRun implements Runnable{
                 mediaPlayer = MediaPlayer.create(context, R.raw.finish);
                 mediaPlayer.start();
                 return ActiveActivity.COMMAND_STOP;
-            } else {
+            } else if(currentPhase < phases.size()) {
                 counterValue = phases.get(currentPhase).getTime();
                 return ActiveActivity.COMMAND_CHANGE;
             }
+            else return 0;
         }
     }
 }

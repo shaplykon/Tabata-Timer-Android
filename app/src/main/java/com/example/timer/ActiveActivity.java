@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -20,16 +22,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceGroupAdapter;
+
+import java.util.ArrayList;
 
 
-public class ActiveActivity extends AppCompatActivity {
+public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
     public final static int  COMMAND_TICK = 100;
     public final static int  COMMAND_STOP = 200;
     public final static int  COMMAND_CHANGE = 300;
 
     public final static String  ARG_PHASE = "phase";
     public final static String  ARG_COUNTER = "counter";
-
+    public final static String  ARG_PHASES = "phases";
+    public final static String  ARG_TIMER = "timer";
 
     public final static String BROADCAST_ACTION = "broadcast";
 
@@ -38,17 +44,26 @@ public class ActiveActivity extends AppCompatActivity {
     ActiveTimerViewModel activeViewModel;
     TimerReceiver broadcastReceiver;
 
+    SQLitePhaseRepository sqLitePhaseRepository;
+
+    ListView tasksListView;
     TextView stageNameText;
     TextView stageText;
     ImageButton buttonPrev;
     ImageButton buttonNext;
     ImageButton buttonBack;
+    ImageButton buttonPause;
+
+    boolean isPaused;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         Intent intent = getIntent();
+        sqLitePhaseRepository = new SQLitePhaseRepository(getApplicationContext());
         TimerSequence timer = (TimerSequence) intent.getSerializableExtra("timer");
-        activeViewModel = new ViewModelProvider(this, new ActiveViewModelFactory(timer)).get(ActiveTimerViewModel.class);
+        ArrayList<Phase> phaseList = sqLitePhaseRepository.get(timer.getId());
+        activeViewModel = new ViewModelProvider(this, new ActiveViewModelFactory(timer, phaseList)).get(ActiveTimerViewModel.class);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_active);
@@ -57,6 +72,7 @@ public class ActiveActivity extends AppCompatActivity {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
+        tasksListView = findViewById(R.id.list_view);
 
         stageNameText = findViewById(R.id.stageName);
         stageText = findViewById(R.id.stageText);
@@ -64,6 +80,27 @@ public class ActiveActivity extends AppCompatActivity {
         buttonPrev = findViewById(R.id.prevButton);
         buttonNext = findViewById(R.id.nextButton);
         buttonBack = findViewById(R.id.backButton);
+        buttonPause = findViewById(R.id.pauseButton);
+
+        isPaused = false;
+
+        buttonPause.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+                if (!activeViewModel.isPaused.getValue()) {
+                    activeViewModel.isPaused.setValue(true);
+
+                } else {
+                    activeViewModel.isPaused.setValue(false);
+
+                }
+                buttonPause.setBackgroundColor(80000000);
+
+            }
+        });
+
+
 
         buttonBack.setOnClickListener(new OnClickListener() {
             @Override
@@ -71,12 +108,9 @@ public class ActiveActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
-
         buttonPrev.setOnClickListener(navigationButtonOnClick);
         buttonNext.setOnClickListener(navigationButtonOnClick);
-
         getSupportActionBar().hide();
-
 
         broadcastReceiver = new TimerReceiver() {
             @Override
@@ -90,16 +124,34 @@ public class ActiveActivity extends AppCompatActivity {
         registerReceiver(broadcastReceiver, intentFilter);
 
         final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
-        serviceIntent.putExtra("timer", activeViewModel.getTimer());
-        serviceIntent.putExtra("phases", activeViewModel.getPhases());
-        startService(serviceIntent);
+
+
+        activeViewModel.isPaused.observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isPaused) {
+                if (activeViewModel.isRunning.getValue()) {
+                    if (isPaused) {
+                        stopService(serviceIntent);
+                        buttonPause.setImageResource(R.drawable.play);
+                    } else {
+                        serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
+                        serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
+                        serviceIntent.putExtra(ARG_PHASE, activeViewModel.currentPhase.getValue());
+                        serviceIntent.putExtra(ARG_COUNTER, activeViewModel.counterValue.getValue());
+                        startService(serviceIntent);
+                        buttonPause.setImageResource(R.drawable.pause);
+                    }
+                }
+            }
+        });
 
         activeViewModel.isRunning.observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean isRunning) {
                 if(!isRunning){
                     stopService(new Intent(serviceIntent));
-                    Toast.makeText(ActiveActivity.this, R.string.training_end, Toast.LENGTH_LONG).show();
+                    Toast.makeText(ActiveActivity.this,
+                            R.string.training_end, Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -110,15 +162,9 @@ public class ActiveActivity extends AppCompatActivity {
             public void onChanged(Integer phase) {
                 ListView lv = findViewById(R.id.list_view);
                 lv.setSelection(phase);
-
-                stageText.setText((phase+1) + "/" + (activeViewModel.phaseList.size()));
+                stageText.setText((phase + 1) + "/" + (activeViewModel.phaseList.size()));
                 stageNameText.setText(activeViewModel.phaseList.get(phase).getName());
                 changeColor(phase);
-                Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
-                serviceIntent.putExtra("timer", activeViewModel.getTimer());
-                serviceIntent.putExtra("phases", activeViewModel.getPhases());
-                serviceIntent.putExtra("phase", phase);
-                startService(serviceIntent);
             }
         });
 
@@ -132,29 +178,25 @@ public class ActiveActivity extends AppCompatActivity {
             switch (v.getId()){
                 case R.id.prevButton:{
                     activeViewModel.changePhase(activeViewModel.currentPhase.getValue() - 1);
+                    break;
                 }
-
                 case R.id.nextButton:{
                     activeViewModel.changePhase(activeViewModel.currentPhase.getValue() + 1);
                 }
-
             }
         }
     };
 
     private void handleReceiver(int command, Intent intent){
-
         switch (command){
             case COMMAND_TICK:{
                 activeViewModel.counterValue.postValue(activeViewModel.counterValue.getValue() - 1);
                 break;
             }
-
             case COMMAND_STOP:{
                 activeViewModel.isRunning.postValue(false);
                 break;
             }
-
             case COMMAND_CHANGE:{
                 activeViewModel.currentPhase.
                         postValue(intent.getIntExtra(ActiveActivity.ARG_PHASE, 0));
@@ -237,5 +279,19 @@ public class ActiveActivity extends AppCompatActivity {
         Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
         stopService(serviceIntent);
         super.onDestroy();
+    }
+
+    @Override
+    public void onItemClicked(int position) {
+        Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+        MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.select);
+        mediaPlayer.start();
+
+        activeViewModel.isPaused.setValue(false);
+
+        serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
+        serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
+        serviceIntent.putExtra(ARG_PHASE, position);
+        startService(serviceIntent);
     }
 }

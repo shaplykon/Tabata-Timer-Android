@@ -1,7 +1,9 @@
 package com.example.timer;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements
     DataAdapter dataAdapter;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+
+    SQLitePhaseRepository phaseRepository;
     SQLiteTimerRepository timerRepository;
 
 
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         timerRepository = new SQLiteTimerRepository(getApplicationContext());
+        phaseRepository = new SQLitePhaseRepository(getApplicationContext());
+
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = sharedPreferences.edit();
@@ -151,7 +157,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onItemDelete(int position) {
+    public void onItemDelete(final int position) {
+        phaseRepository.delete(timerList.get(position).getId());
         timerRepository.delete(timerList.get(position).getId());
         timerList.remove(position);
         recyclerView.getRecycledViewPool().clear();

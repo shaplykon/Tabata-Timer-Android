@@ -12,28 +12,20 @@ public class ActiveTimerViewModel extends ViewModel {
     MutableLiveData<Integer> counterValue;
     MutableLiveData<Integer> currentPhase;
     MutableLiveData<Boolean> isRunning;
+    MutableLiveData<Boolean> isPaused;
 
-
-    public ActiveTimerViewModel(@NonNull TimerSequence timer) {
+    
+    public ActiveTimerViewModel(@NonNull TimerSequence timer, ArrayList<Phase> phaseList) {
         this.timer = timer;
+        this.phaseList = phaseList;
         counterValue = new MutableLiveData<>();
         currentPhase = new MutableLiveData<>();
         isRunning = new MutableLiveData<>();
+        isPaused = new MutableLiveData<>();
         counterValue.setValue(timer.getPreparationTime());
         currentPhase.setValue(0);
         isRunning.setValue(true);
-
-        for (int cycle = 0; cycle < timer.getCyclesAmount(); cycle++) {
-
-            phaseList.add(new Phase(timer.getPreparationTime(), "Preparing"));
-            for (int set = 0; set < timer.getSetsAmount(); set++) {
-                phaseList.add(new Phase(timer.getWorkingTime(), "Work"));
-                phaseList.add(new Phase(timer.getRestTime(), "Rest"));
-            }
-            phaseList.add(new Phase(timer.getCooldownTime(), "Cooldown"));
-            phaseList.add(new Phase(timer.getBetweenSetsRest(), "Rest"));
-        }
-        phaseList.remove(phaseList.size() - 1);
+        isPaused.setValue(false);
     }
 
     public TimerSequence getTimer(){
@@ -45,7 +37,14 @@ public class ActiveTimerViewModel extends ViewModel {
     }
 
     public void changePhase(int position){
-        currentPhase.setValue(position);
+        if(position <  0){
+            position = 0;
+        }
+        else if(position > phaseList.size() - 1){
+            position = phaseList.size() - 1;
+        }
+
+        currentPhase.postValue(position);
         counterValue.postValue(phaseList.get(position).getTime());
     }
 

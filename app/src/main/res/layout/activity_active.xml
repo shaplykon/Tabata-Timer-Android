@@ -71,16 +71,17 @@
         app:layout_constraintStart_toEndOf="@+id/prevButton"
         app:layout_constraintTop_toBottomOf="@+id/fragment2" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/pauseButton"
-        android:layout_width="78dp"
-        android:layout_height="78dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
         android:scaleType="fitXY"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_media_pause" />
+        app:srcCompat="@drawable/pause" />
 
     <TextView
         android:id="@+id/stageName"
@@ -98,12 +99,12 @@
 
     <ImageButton
         android:id="@+id/backButton"
+        android:layout_width="54dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="36dp"
         android:background="@android:color/transparent"
         android:scaleType="fitXY"
-        android:layout_width="78dp"
-        android:layout_height="78dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/abc_vector_test" />

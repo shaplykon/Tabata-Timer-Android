@@ -34,7 +34,7 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
     CardView colorView;
     EditableTimerViewModel editableViewModel;
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "ResourceAsColor"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +83,7 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
             createColorPickerDialog(editableViewModel.id.getValue());
         }
         });
+
 
         colorView.setCardBackgroundColor(editableViewModel.color.getValue());
 

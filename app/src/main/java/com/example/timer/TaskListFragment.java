@@ -20,13 +20,14 @@ public class TaskListFragment extends Fragment {
 
     ArrayList<String> tasks = new ArrayList<>();
     ArrayAdapter<String> adapter;
-
+    OnItemClicked onItemClicked;
     ListView listView;
     private ActiveTimerViewModel activeViewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        onItemClicked = (OnItemClicked) getActivity();
         activeViewModel = new ViewModelProvider(requireActivity()).get(ActiveTimerViewModel.class);
         fillTasksList();
         adapter = new ArrayAdapter<>(getContext(), R.layout.task_list_item, tasks);
@@ -66,7 +67,7 @@ public class TaskListFragment extends Fragment {
                 if (activeViewModel.isRunning.getValue()) {
                     activeViewModel.changePhase(position);
                     listView.smoothScrollToPosition(position);
-
+                    onItemClicked.onItemClicked(position);
                 }
             }
         });
@@ -77,7 +78,7 @@ public class TaskListFragment extends Fragment {
             @SuppressLint("ResourceAsColor")
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                listView.getChildAt(position).setBackgroundColor(R.color.darkGreen);
+         //       listView.getChildAt(position).setBackgroundColor(R.color.darkGreen);
             }
 
             @Override
@@ -88,4 +89,7 @@ public class TaskListFragment extends Fragment {
 
         return view;
     }
+}
+interface  OnItemClicked{
+    void onItemClicked(int position);
 }
