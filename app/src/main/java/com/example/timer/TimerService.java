@@ -78,10 +78,10 @@ public class TimerService extends Service {
                 .setContentTitle(getResources().getString(R.string.notification_title))
                 .setContentText(getResources().getString(R.string.notification_text))
                 .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                .setContentIntent(pendingIntent)
-                .addAction(0, "Previous", actionPreviousIntent)
-                .addAction(0, "Pause", actionPauseIntent)
-                .addAction(0, "Next", actionNextIntent);
+                .setContentIntent(pendingIntent);
+       //         .addAction(0, "Previous", actionPreviousIntent)
+     //           .addAction(0, "Pause", actionPauseIntent)
+      //          .addAction(0, "Next", actionNextIntent);
         Notification notification = notificationBuilder.build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, notification);
