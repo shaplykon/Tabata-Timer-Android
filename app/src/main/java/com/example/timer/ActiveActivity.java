@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.Observer;
@@ -35,14 +36,20 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
     public final static int  COMMAND_STOP = 200;
     public final static int  COMMAND_CHANGE = 300;
 
+    public static final int ACTION_PREV = 400;
+    public static final int ACTION_PAUSE = 500;
+    public static final int ACTION_NEXT = 600;
+
     public final static String  ARG_PHASE = "phase";
     public final static String  ARG_COUNTER = "counter";
     public final static String  ARG_PHASES = "phases";
     public final static String  ARG_TIMER = "timer";
 
     public final static String BROADCAST_ACTION = "broadcast";
-
+    public final static String NOTIFICATION_ACTION = "notification";
     public final static String PARAM_COMMAND = "command";
+    public final static String PARAM_ACTION = "action";
+
 
     TimerService timerService;
 
@@ -110,16 +117,24 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int command = intent.getIntExtra(PARAM_COMMAND, 0);
-
-                handleReceiver(command, intent);
+                handleCommand(command, intent);
             }
         };
+
+        NotificationReceiver notificationReceiver = new NotificationReceiver(){
+            @Override
+            public void onReceive(Context context, @NonNull Intent intent) {
+                int command = intent.getIntExtra(PARAM_ACTION, 0);
+                handleAction(command);
+            }
+        };
+
+        registerReceiver(notificationReceiver, new IntentFilter(NOTIFICATION_ACTION));
 
         IntentFilter intentFilter  = new IntentFilter(BROADCAST_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
 
         final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
-
 
         activeViewModel.isPaused.observe(this, new Observer<Boolean>() {
             @Override
@@ -129,13 +144,8 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
                         stopService(serviceIntent);
                         buttonPause.setImageResource(R.drawable.play);
                     } else {
-                        serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
-                        serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
-                        serviceIntent.putExtra(ARG_PHASE, activeViewModel.currentPhase.getValue());
-                        serviceIntent.putExtra(ARG_COUNTER, activeViewModel.counterValue.getValue());
-                        startService(serviceIntent);
-                        bindService(serviceIntent, mConnection, BIND_ADJUST_WITH_ACTIVITY);
                         buttonPause.setImageResource(R.drawable.pause);
+                        restartService();
                     }
                 }
             }
@@ -145,6 +155,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
             @Override
             public void onChanged(Boolean isRunning) {
                 if(!isRunning){
+                    timerService.hideNotification();
                     stopService(new Intent(serviceIntent));
                     Toast.makeText(ActiveActivity.this,
                             R.string.training_end, Toast.LENGTH_LONG).show();
@@ -163,8 +174,6 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
                 changeColor(phase);
             }
         });
-
-
     }
 
     OnClickListener navigationButtonOnClick = new OnClickListener() {
@@ -178,12 +187,52 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
                 }
                 case R.id.nextButton:{
                     activeViewModel.changePhase(activeViewModel.currentPhase.getValue() + 1);
+                    break;
                 }
+
             }
+            Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.select);
+            mediaPlayer.start();
+
+            activeViewModel.isPaused.setValue(false);
+
+            serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
+            serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
+            serviceIntent.putExtra(ARG_PHASE, activeViewModel.currentPhase.getValue());
+
+            startService(serviceIntent);
         }
     };
 
-    private void handleReceiver(int command, Intent intent){
+    private void restartService(){
+        final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+        serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
+        serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
+        serviceIntent.putExtra(ARG_PHASE, activeViewModel.currentPhase.getValue());
+        serviceIntent.putExtra(ARG_COUNTER, activeViewModel.counterValue.getValue());
+        startService(serviceIntent);
+        bindService(serviceIntent, mConnection, BIND_ADJUST_WITH_ACTIVITY);
+    }
+
+    private void handleAction(int command) {
+        switch (command) {
+            case ACTION_PREV: {
+                Toast.makeText(getApplicationContext(), "prev", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case ACTION_PAUSE: {
+                Toast.makeText(getApplicationContext(), "pause", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case ACTION_NEXT: {
+                Toast.makeText(getApplicationContext(), "next", Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    }
+
+    private void handleCommand(int command, Intent intent){
         switch (command){
             case COMMAND_TICK:{
                 activeViewModel.counterValue.postValue(activeViewModel.counterValue.getValue() - 1);
@@ -223,7 +272,6 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         quitDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                timerService.hideNotification();
                 finish();
             }
         });
@@ -288,6 +336,9 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
     @Override
     protected void onDestroy() {
         Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+        if(timerService != null){
+            timerService.hideNotification();
+        }
         stopService(serviceIntent);
         super.onDestroy();
     }
@@ -303,6 +354,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
         serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
         serviceIntent.putExtra(ARG_PHASE, position);
+
         startService(serviceIntent);
     }
 }

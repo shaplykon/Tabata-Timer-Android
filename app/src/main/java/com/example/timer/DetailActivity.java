@@ -6,9 +6,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -115,49 +117,49 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         editableViewModel.preparingTime.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-              preparingTimeEdit.setText(String.valueOf(Math.max((int)integer, 0)));
+                preparingTimeEdit.setText(String.valueOf(integer));
             }
         });
 
         editableViewModel.workingTime.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                workingTimeEdit.setText(String.valueOf(Math.max((int)integer, 0)));
+                    workingTimeEdit.setText(String.valueOf(integer));
             }
         });
 
         editableViewModel.restTime.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                restTimeEdit.setText(String.valueOf(Math.max((int)integer, 0)));
+                    restTimeEdit.setText(String.valueOf(integer));
             }
         });
 
         editableViewModel.cyclesAmount.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                cyclesAmountEdit.setText(String.valueOf(Math.max((int)integer, 0)));
+                    cyclesAmountEdit.setText(String.valueOf(integer));
             }
         });
 
         editableViewModel.setsAmount.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                setsAmountEdit.setText(String.valueOf(Math.max((int) integer, 0)));
+                    setsAmountEdit.setText(String.valueOf( integer));
             }
         });
 
         editableViewModel.restBetweenSets.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                restBetweenSetsEdit.setText(String.valueOf(Math.max((int)integer, 0)));
+                    restBetweenSetsEdit.setText(String.valueOf(integer));
             }
         });
 
         editableViewModel.cooldownTime.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                cooldownTimeEdit.setText(String.valueOf(Math.max((int)integer, 0)));
+                    cooldownTimeEdit.setText(String.valueOf(integer));
             }
         });
 
@@ -172,35 +174,7 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         View.OnClickListener buttonsClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (view.getId() == R.id.preparingMinusButton) {
-                    editableViewModel.preparingTime.setValue(editableViewModel.preparingTime.getValue() - 1);
-                } else if (view.getId() == R.id.preparingPlusButton) {
-                    editableViewModel.preparingTime.setValue(editableViewModel.preparingTime.getValue() + 1);
-                } else if (view.getId() == R.id.workingMinusButton) {
-                    editableViewModel.workingTime.setValue(editableViewModel.workingTime.getValue() - 1);
-                } else if (view.getId() == R.id.workingPlusButton) {
-                    editableViewModel.workingTime.setValue(editableViewModel.workingTime.getValue() + 1);
-                } else if (view.getId() == R.id.restMinusButton) {
-                    editableViewModel.restTime.setValue(editableViewModel.restTime.getValue() - 1);
-                } else if (view.getId() == R.id.restPlusButton) {
-                    editableViewModel.restTime.setValue(editableViewModel.restTime.getValue() + 1);
-                } else if (view.getId() == R.id.cyclesMinusButton) {
-                    editableViewModel.cyclesAmount.setValue(editableViewModel.cyclesAmount.getValue() - 1);
-                } else if (view.getId() == R.id.cyclesPlusButton) {
-                    editableViewModel.cyclesAmount.setValue(editableViewModel.cyclesAmount.getValue() + 1);
-                } else if (view.getId() == R.id.setsAmountMinusButton) {
-                    editableViewModel.setsAmount.setValue(editableViewModel.setsAmount.getValue() - 1);
-                } else if (view.getId() == R.id.setsAmountPlusButton) {
-                    editableViewModel.setsAmount.setValue(editableViewModel.setsAmount.getValue() + 1);
-                } else if (view.getId() == R.id.restBetweenSetsMinusButton) {
-                    editableViewModel.restBetweenSets.setValue(editableViewModel.restBetweenSets.getValue() - 1);
-                } else if (view.getId() == R.id.restBetweenSetsPlusButton) {
-                    editableViewModel.restBetweenSets.setValue(editableViewModel.restBetweenSets.getValue() + 1);
-                } else if (view.getId() == R.id.cooldownMinusButton) {
-                    editableViewModel.cooldownTime.setValue(editableViewModel.cooldownTime.getValue() - 1);
-                } else if (view.getId() == R.id.cooldownPlusButton) {
-                    editableViewModel.cooldownTime.setValue(editableViewModel.cooldownTime.getValue() + 1);
-                }
+                changeValue(view);
             }
         };
 
@@ -223,6 +197,8 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
         confirmButton.setOnClickListener(confirmButtonListener);
     }
 
+
+
     private void createColorPickerDialog(int id) {
         ColorPickerDialog.newBuilder()
                 .setColor(Color.RED)
@@ -234,7 +210,10 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
                 .show(this);
     }
 
-
+    private void showToast() {
+        Toast.makeText(this, getResources().getString(R.string.min_value_toast),
+                Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public void onColorSelected(int _id, int color) {
@@ -245,4 +224,51 @@ public class DetailActivity extends AppCompatActivity implements ColorPickerDial
     public void onDialogDismissed(int dialogId) {
 
     }
+
+    private void changeValue(View view){
+        if (view.getId() == R.id.preparingMinusButton) {
+            if (editableViewModel.preparingTime.getValue() - 1 >= 0)
+                editableViewModel.preparingTime.setValue(editableViewModel.preparingTime.getValue() - 1);
+            else showToast();
+        } else if (view.getId() == R.id.workingMinusButton) {
+            if (editableViewModel.workingTime.getValue() - 1 >= 0)
+                editableViewModel.workingTime.setValue(editableViewModel.workingTime.getValue() - 1);
+            else showToast();
+        } else if (view.getId() == R.id.restMinusButton) {
+            if (editableViewModel.restTime.getValue() - 1 >= 0)
+                editableViewModel.restTime.setValue(editableViewModel.restTime.getValue() - 1);
+            else showToast();
+        } else if (view.getId() == R.id.cyclesMinusButton) {
+            if (editableViewModel.cyclesAmount.getValue() - 1 >= 1)
+                editableViewModel.cyclesAmount.setValue(editableViewModel.cyclesAmount.getValue() - 1);
+            else showToast();
+        } else if (view.getId() == R.id.setsAmountMinusButton) {
+            if (editableViewModel.setsAmount.getValue() - 1 >= 1)
+                editableViewModel.setsAmount.setValue(editableViewModel.setsAmount.getValue() - 1);
+            else showToast();
+        } else if (view.getId() == R.id.restBetweenSetsMinusButton) {
+            if (editableViewModel.restBetweenSets.getValue() - 1 >= 0)
+                editableViewModel.restBetweenSets.setValue(editableViewModel.restBetweenSets.getValue() - 1);
+            else showToast();
+        } else if (view.getId() == R.id.cooldownMinusButton) {
+            if (editableViewModel.cooldownTime.getValue() - 1 >= 0)
+                editableViewModel.cooldownTime.setValue(editableViewModel.cooldownTime.getValue() - 1);
+            else showToast();
+        } else if (view.getId() == R.id.preparingPlusButton) {
+            editableViewModel.preparingTime.setValue(editableViewModel.preparingTime.getValue() + 1);
+        } else if (view.getId() == R.id.workingPlusButton) {
+            editableViewModel.workingTime.setValue(editableViewModel.workingTime.getValue() + 1);
+        } else if (view.getId() == R.id.restPlusButton) {
+            editableViewModel.restTime.setValue(editableViewModel.restTime.getValue() + 1);
+        } else if (view.getId() == R.id.cyclesPlusButton) {
+            editableViewModel.cyclesAmount.setValue(editableViewModel.cyclesAmount.getValue() + 1);
+        } else if (view.getId() == R.id.setsAmountPlusButton) {
+            editableViewModel.setsAmount.setValue(editableViewModel.setsAmount.getValue() + 1);
+        } else if (view.getId() == R.id.restBetweenSetsPlusButton) {
+            editableViewModel.restBetweenSets.setValue(editableViewModel.restBetweenSets.getValue() + 1);
+        } else if (view.getId() == R.id.cooldownPlusButton) {
+            editableViewModel.cooldownTime.setValue(editableViewModel.cooldownTime.getValue() + 1);
+        }
+    }
+
 }

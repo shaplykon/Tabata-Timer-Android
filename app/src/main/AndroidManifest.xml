@@ -19,10 +19,19 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="broadcast"/>
-
             </intent-filter>
 
         </receiver>
+
+        <receiver
+            android:name=".NotificationReceiver"
+            android:enabled="true">
+        <intent-filter>
+            <action android:name="notification" />
+        </intent-filter>
+
+        </receiver>
+
 
         <service
             android:name=".TimerService"

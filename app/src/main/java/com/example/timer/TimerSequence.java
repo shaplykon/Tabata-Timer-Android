@@ -35,8 +35,8 @@ public class TimerSequence implements Serializable {
         this.preparationTime = 0;
         this.workingTime = 0;
         this.restTime = 0;
-        this.cyclesAmount = 0;
-        this.setsAmount = 0;
+        this.cyclesAmount = 1;
+        this.setsAmount = 1;
         this.betweenSetsRest = 0;
         this.cooldownTime = 0;
         this.color = 0;

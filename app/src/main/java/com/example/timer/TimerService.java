@@ -49,16 +49,39 @@ public class TimerService extends Service {
         super.onCreate();
 
         createNotificationChannel();
+
         Intent intent = new Intent(this, ActiveActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
+        Intent broadcastPreviousIntent = new Intent(ActiveActivity.NOTIFICATION_ACTION);
+        broadcastPreviousIntent.putExtra(ActiveActivity.PARAM_ACTION, ActiveActivity.ACTION_PREV);
+
+        Intent broadcastPauseIntent = new Intent(ActiveActivity.NOTIFICATION_ACTION);
+        broadcastPauseIntent.putExtra(ActiveActivity.PARAM_ACTION, ActiveActivity.ACTION_PAUSE);
+
+        Intent broadcastNextIntent = new Intent(ActiveActivity.NOTIFICATION_ACTION);
+        broadcastNextIntent.putExtra(ActiveActivity.PARAM_ACTION, ActiveActivity.ACTION_NEXT);
+
+        PendingIntent actionPreviousIntent = PendingIntent.getBroadcast(this, 0,
+                broadcastPreviousIntent, 0);
+
+        PendingIntent actionPauseIntent = PendingIntent.getBroadcast(this, 0,
+                broadcastPauseIntent, 0);
+
+        PendingIntent actionNextIntent = PendingIntent.getBroadcast(this, 0,
+                broadcastNextIntent, 0);
+
 
         notificationBuilder = new NotificationCompat.Builder(this, "TimerChannel")
                 .setContentTitle(getResources().getString(R.string.notification_title))
                 .setContentText(getResources().getString(R.string.notification_text))
                 .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .addAction(0, "Previous", actionPreviousIntent)
+                .addAction(0, "Pause", actionPauseIntent)
+                .addAction(0, "Next", actionNextIntent);
         Notification notification = notificationBuilder.build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, notification);
@@ -98,7 +121,7 @@ public class TimerService extends Service {
                 "Timer notification",
                 NotificationManager.IMPORTANCE_DEFAULT);
 
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(notificationChannel);
     }
 }

@@ -44,8 +44,9 @@ public class ActiveTimerViewModel extends ViewModel {
             position = phaseList.size() - 1;
         }
 
-        currentPhase.postValue(position);
-        counterValue.postValue(phaseList.get(position).getTime());
+
+        currentPhase.setValue(position);
+        counterValue.setValue(phaseList.get(position).getTime());
     }
 
 }
