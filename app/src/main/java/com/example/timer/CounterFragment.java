@@ -22,7 +22,6 @@ public class CounterFragment extends Fragment {
         viewModel.counterValue.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-
                 counterText.setText(String.valueOf(integer));
             }
         });
