@@ -54,34 +54,28 @@ public class TimerService extends Service {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
+        Intent previousIntent = new Intent(ActiveActivity.ACTION_PREV);
+        Intent pauseIntent = new Intent(ActiveActivity.ACTION_PAUSE);
+        Intent nextIntent = new Intent(ActiveActivity.ACTION_NEXT);
 
-        Intent broadcastPreviousIntent = new Intent(ActiveActivity.NOTIFICATION_ACTION);
-        broadcastPreviousIntent.putExtra(ActiveActivity.PARAM_ACTION, ActiveActivity.ACTION_PREV);
+        PendingIntent pendingPreviousIntent = PendingIntent.getBroadcast(this, 0,
+                previousIntent, 0);
 
-        Intent broadcastPauseIntent = new Intent(ActiveActivity.NOTIFICATION_ACTION);
-        broadcastPauseIntent.putExtra(ActiveActivity.PARAM_ACTION, ActiveActivity.ACTION_PAUSE);
+        PendingIntent pendingPauseIntent = PendingIntent.getBroadcast(this, 0,
+                pauseIntent, 0);
 
-        Intent broadcastNextIntent = new Intent(ActiveActivity.NOTIFICATION_ACTION);
-        broadcastNextIntent.putExtra(ActiveActivity.PARAM_ACTION, ActiveActivity.ACTION_NEXT);
-
-        PendingIntent actionPreviousIntent = PendingIntent.getBroadcast(this, 0,
-                broadcastPreviousIntent, 0);
-
-        PendingIntent actionPauseIntent = PendingIntent.getBroadcast(this, 0,
-                broadcastPauseIntent, 0);
-
-        PendingIntent actionNextIntent = PendingIntent.getBroadcast(this, 0,
-                broadcastNextIntent, 0);
+        PendingIntent pendingNextIntent = PendingIntent.getBroadcast(this, 0,
+                nextIntent, 0);
 
 
         notificationBuilder = new NotificationCompat.Builder(this, "TimerChannel")
                 .setContentTitle(getResources().getString(R.string.notification_title))
                 .setContentText(getResources().getString(R.string.notification_text))
                 .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                .setContentIntent(pendingIntent);
-       //         .addAction(0, "Previous", actionPreviousIntent)
-     //           .addAction(0, "Pause", actionPauseIntent)
-      //          .addAction(0, "Next", actionNextIntent);
+                .setContentIntent(pendingIntent)
+                .addAction(0, "Previous", pendingPreviousIntent)
+                .addAction(0, "Pause", pendingPauseIntent)
+                .addAction(0, "Next", pendingNextIntent);
         Notification notification = notificationBuilder.build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, notification);

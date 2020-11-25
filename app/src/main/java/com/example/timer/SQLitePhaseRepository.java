@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class SQLitePhaseRepository implements PhaseRepository {
-    private final SQLiteDatabase db;
     private final SQLiteHelper dbHelper;
 
     public SQLitePhaseRepository(Context context){
         dbHelper = new SQLiteHelper(context);
-        db = dbHelper.getWritableDatabase();
     }
 
     @Override

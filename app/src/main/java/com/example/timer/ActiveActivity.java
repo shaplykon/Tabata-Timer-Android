@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,8 +25,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.preference.PreferenceGroupAdapter;
-
 import java.util.ArrayList;
 
 
@@ -36,9 +33,9 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
     public final static int  COMMAND_STOP = 200;
     public final static int  COMMAND_CHANGE = 300;
 
-    public static final int ACTION_PREV = 400;
-    public static final int ACTION_PAUSE = 500;
-    public static final int ACTION_NEXT = 600;
+    public static final String ACTION_PREV = "previous";
+    public static final String ACTION_PAUSE = "pause";
+    public static final String ACTION_NEXT = "next";
 
     public final static String  ARG_PHASE = "phase";
     public final static String  ARG_COUNTER = "counter";
@@ -47,10 +44,11 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
 
     public final static String BROADCAST_ACTION = "broadcast";
     public final static String NOTIFICATION_ACTION = "notification";
+
     public final static String PARAM_COMMAND = "command";
     public final static String PARAM_ACTION = "action";
 
-
+    Intent serviceIntent;
     TimerService timerService;
 
     ActiveTimerViewModel activeViewModel;
@@ -65,9 +63,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
     ImageButton buttonNext;
     ImageButton buttonBack;
     ImageButton buttonPause;
-
-    boolean isPaused;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -77,7 +73,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         ArrayList<Phase> phaseList = sqLitePhaseRepository.get(timer.getId());
         activeViewModel = new ViewModelProvider(this, new ActiveViewModelFactory(timer, phaseList)).get(ActiveTimerViewModel.class);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_active);
+            setContentView(R.layout.activity_active);
 
         final Window window = this.getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -92,8 +88,6 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         buttonNext = findViewById(R.id.nextButton);
         buttonBack = findViewById(R.id.backButton);
         buttonPause = findViewById(R.id.pauseButton);
-
-        isPaused = false;
 
         buttonPause.setOnClickListener(new OnClickListener() {
             @Override
@@ -124,17 +118,18 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         NotificationReceiver notificationReceiver = new NotificationReceiver(){
             @Override
             public void onReceive(Context context, @NonNull Intent intent) {
-                int command = intent.getIntExtra(PARAM_ACTION, 0);
-                handleAction(command);
+                handleAction(intent.getAction());
             }
         };
 
-        registerReceiver(notificationReceiver, new IntentFilter(NOTIFICATION_ACTION));
+        registerReceiver(notificationReceiver, new IntentFilter(ACTION_PREV));
+        registerReceiver(notificationReceiver, new IntentFilter(ACTION_PAUSE));
+        registerReceiver(notificationReceiver, new IntentFilter(ACTION_NEXT));
 
         IntentFilter intentFilter  = new IntentFilter(BROADCAST_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
 
-        final Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+        serviceIntent = new Intent(getBaseContext(), TimerService.class);
 
         activeViewModel.isPaused.observe(this, new Observer<Boolean>() {
             @Override
@@ -180,28 +175,30 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         @SuppressLint("NonConstantResourceId")
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
-                case R.id.prevButton:{
-                    activeViewModel.changePhase(activeViewModel.currentPhase.getValue() - 1);
-                    break;
-                }
-                case R.id.nextButton:{
-                    activeViewModel.changePhase(activeViewModel.currentPhase.getValue() + 1);
-                    break;
-                }
+            if (activeViewModel.isRunning.getValue()) {
+                switch (v.getId()) {
+                    case R.id.prevButton: {
+                        activeViewModel.changePhase(activeViewModel.currentPhase.getValue() - 1);
+                        break;
+                    }
+                    case R.id.nextButton: {
+                        activeViewModel.changePhase(activeViewModel.currentPhase.getValue() + 1);
+                        break;
+                    }
 
+                }
+                Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+                MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.select);
+                mediaPlayer.start();
+
+                activeViewModel.isPaused.setValue(false);
+
+                serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
+                serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
+                serviceIntent.putExtra(ARG_PHASE, activeViewModel.currentPhase.getValue());
+
+                startService(serviceIntent);
             }
-            Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
-            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.select);
-            mediaPlayer.start();
-
-            activeViewModel.isPaused.setValue(false);
-
-            serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
-            serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
-            serviceIntent.putExtra(ARG_PHASE, activeViewModel.currentPhase.getValue());
-
-            startService(serviceIntent);
         }
     };
 
@@ -215,17 +212,20 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         bindService(serviceIntent, mConnection, BIND_ADJUST_WITH_ACTIVITY);
     }
 
-    private void handleAction(int command) {
-        switch (command) {
+    private void handleAction(String action) {
+        switch (action) {
             case ACTION_PREV: {
                 Toast.makeText(getApplicationContext(), "prev", Toast.LENGTH_SHORT).show();
+                buttonPrev.performClick();
                 break;
             }
             case ACTION_PAUSE: {
+                buttonPause.performClick();
                 Toast.makeText(getApplicationContext(), "pause", Toast.LENGTH_SHORT).show();
                 break;
             }
             case ACTION_NEXT: {
+                buttonNext.performClick();
                 Toast.makeText(getApplicationContext(), "next", Toast.LENGTH_SHORT).show();
                 break;
             }
@@ -252,7 +252,6 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
             }
         }
     }
-
     @Override
     public void onBackPressed() {
         if(activeViewModel.isRunning.getValue()){
@@ -286,12 +285,9 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
         quitDialog.show();
     }
 
-
     ServiceConnection mConnection = new ServiceConnection() {
         @Override
-        public void onServiceDisconnected(ComponentName name) {
-            timerService = null;
-        }
+        public void onServiceDisconnected(ComponentName name) { }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -306,7 +302,6 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
 
         if (phase < activeViewModel.phaseList.size()) {
             Phase currentPhase = activeViewModel.phaseList.get(phase);
-
             switch (currentPhase.getName()) {
                 case "Preparing": {
                     background.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
@@ -336,25 +331,27 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
     @Override
     protected void onDestroy() {
         Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
-        if(timerService != null){
-            timerService.hideNotification();
-        }
+        timerService.hideNotification();
         stopService(serviceIntent);
         super.onDestroy();
     }
 
     @Override
     public void onItemClicked(int position) {
-        Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
-        MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.select);
-        mediaPlayer.start();
+        if (position < activeViewModel.phaseList.size()) {
+            Intent serviceIntent = new Intent(getBaseContext(), TimerService.class);
+            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.select);
+            mediaPlayer.start();
 
-        activeViewModel.isPaused.setValue(false);
+            activeViewModel.isPaused.setValue(false);
 
-        serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
-        serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
-        serviceIntent.putExtra(ARG_PHASE, position);
+            serviceIntent.putExtra(ARG_TIMER, activeViewModel.getTimer());
+            serviceIntent.putExtra(ARG_PHASES, activeViewModel.getPhases());
+            serviceIntent.putExtra(ARG_PHASE, position);
 
-        startService(serviceIntent);
+            startService(serviceIntent);
+        } else {
+            activeViewModel.isRunning.setValue(false);
+        }
     }
 }
