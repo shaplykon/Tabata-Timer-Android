@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreferenceCompat
+        android:clipToPadding="true"
+        app:key="darkMode"
+        app:title="@string/darkMode" />
+    <SwitchPreferenceCompat
+        app:key="engMode"
+        app:title="@string/engLocale" />
+    <ListPreference
+        android:defaultValue="true"
+        android:entries="@array/font_size_array"
+        android:entryValues="@array/font_size_array"
+        android:key="fontSize"
+        android:title="@string/font_size_title"
+        app:dialogTitle="@string/font_size_dialog_title"
+        app:summary="@string/font_size_summary" />
+    <Preference
+        android:key="resetData"
+        android:title="@string/reset_data"
+        app:summary="@string/reset_data_summary"/>
+    <Preference
+        android:key="versionName"
+        android:title="@string/version_name"/>
+</PreferenceScreen>
+

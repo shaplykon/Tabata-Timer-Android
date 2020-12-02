@@ -2,7 +2,8 @@ package com.example.timer;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,52 +22,51 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder> implements  ItemTouchHelperAdapter {
+public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder>
+        implements ItemTouchHelperAdapter{
+
     Context context;
     ArrayList<TimerSequence> timerList;
 
-    private OnTimerListener mOnTimerListener;
-    private OnLongTimerListener mOnLongClickListener;
-    private OnItemDelete mOnItemDelete;
-    private SQLiteHelper helper;
+    private final OnTimerListener mOnTimerListener;
+    private final OnItemDeleteListener mOnDeleteListener;
+
+    public void notifyData(ArrayList<TimerSequence> list){
+        timerList = list;
+        this.notifyDataSetChanged();
+    }
 
     public DataAdapter(Context context, ArrayList<TimerSequence> timerList,
-                       OnTimerListener onTimerListener,
-                       OnLongTimerListener onLongClickListener,
-                       OnItemDelete onItemDelete) {
+                       OnTimerListener onTimerListener, OnItemDeleteListener mOnDeleteListener) {
         this.context = context;
         this.timerList = timerList;
         this.mOnTimerListener = onTimerListener;
-        this.mOnLongClickListener = onLongClickListener;
-        this.mOnItemDelete = onItemDelete;
-        this.helper = new SQLiteHelper(context);
+        this.mOnDeleteListener = mOnDeleteListener;
     }
 
     @NonNull
     @Override
     public DataHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row, parent, false);
-        return new DataHolder(view, mOnTimerListener, mOnLongClickListener, mOnItemDelete, context, timerList);
+        return new DataHolder(view, mOnTimerListener, mOnDeleteListener);
     }
 
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(@NonNull DataHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final DataHolder holder, final int position) {
         TimerSequence timerSequence = timerList.get(position);
-        holder.title.setText("Timer name: " + timerSequence.getTitle());
-        holder.preparationTime.setText("Preparation time: " + timerSequence.getPreparationTime());
-        holder.workingTime.setText("Working time: " + timerSequence.getWorkingTime());
-        holder.restTime.setText("Rest time: " + timerSequence.getRestTime());
-        holder.cyclesAmount.setText("Cycles amount: " + timerSequence.getCyclesAmount());
-        holder.setsAmount.setText("Sets amount: " + timerSequence.getSetsAmount());
-        holder.betweenSetsRest.setText("Between sets rest: " + timerSequence.getBetweenSetsRest());
-        holder.cooldownTime.setText("Cooldown time: " + timerSequence.getCooldownTime());
-        timerList = helper.getList();
-        int color = helper.getColorByTimerID(timerList.get(position).getId());
-        holder.layout.setBackgroundColor(color);
-        holder.cardView.setCardBackgroundColor(color);
-
+        Resources resources = context.getResources();
+        holder.title.setText(resources.getString(R.string.training_name) + ": " + timerSequence.getTitle());
+        holder.preparationTime.setText(resources.getString(R.string.preparing_time) + ": " + timerSequence.getPreparationTime());
+        holder.workingTime.setText(resources.getString(R.string.working_time) + ": " + timerSequence.getWorkingTime());
+        holder.restTime.setText(resources.getString(R.string.rest_time) + ": " + timerSequence.getRestTime());
+        holder.cyclesAmount.setText(resources.getString(R.string.cycles_amount) + ": " + timerSequence.getCyclesAmount());
+        holder.setsAmount.setText(resources.getString(R.string.sets_amount) + ": " + timerSequence.getSetsAmount());
+        holder.betweenSetsRest.setText(resources.getString(R.string.rest_between_sets) + ": " + timerSequence.getBetweenSetsRest());
+        holder.cooldownTime.setText(resources.getString(R.string.cooldown_time) + ": " + timerSequence.getCooldownTime());
+        holder.layout.setBackgroundColor(timerSequence.getColor());
+        holder.cardView.setCardBackgroundColor(timerSequence.getColor());
     }
 
     @Override
@@ -95,22 +95,26 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder> im
         notifyItemRemoved(position);
     }
 
-    public static class DataHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+
+    public class DataHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         TextView title, preparationTime, workingTime, restTime, cyclesAmount, setsAmount, betweenSetsRest,
                 cooldownTime;
+
         LinearLayout layout;
         CardView cardView;
         OnTimerListener onTimerListener;
         OnLongTimerListener onLongClickListener;
-        ImageButton deleteButton;
+        OnItemDeleteListener onItemDeleteListener;
+        ImageButton editButton;
+        ImageButton playButton;
 
-        public DataHolder(View itemView, final OnTimerListener onTimerListener,
-                          final OnLongTimerListener onLongClickListener, final OnItemDelete onItemDelete,
-                          final Context context, final ArrayList<TimerSequence> timer) {
+        public DataHolder(View itemView, OnTimerListener mOnTimerListener, OnItemDeleteListener mOnDeleteListener) {
             super(itemView);
-            cardView = (CardView) itemView.findViewById(R.id.cardView);
-            layout = (LinearLayout) itemView.findViewById(R.id.linearLayout);
-            deleteButton = (ImageButton) itemView.findViewById(R.id.editButton);
+            cardView = itemView.findViewById(R.id.cardView);
+            layout = itemView.findViewById(R.id.linearLayout);
+            editButton = itemView.findViewById(R.id.editButton);
+            playButton = itemView.findViewById(R.id.playButton);
+
             title = itemView.findViewById(R.id.timerTitleText);
             preparationTime = itemView.findViewById(R.id.preparationTimeText);
             workingTime = itemView.findViewById(R.id.workingTimeText);
@@ -119,56 +123,60 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder> im
             setsAmount = itemView.findViewById(R.id.setsAmountText);
             betweenSetsRest = itemView.findViewById(R.id.betweenSetsRestText);
             cooldownTime = itemView.findViewById(R.id.cooldownTimeText);
-            this.onTimerListener = onTimerListener;
-            this.onLongClickListener = onLongClickListener;
+            onTimerListener = mOnTimerListener;
+            onItemDeleteListener = mOnDeleteListener;
             itemView.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
+            //itemView.setOnLongClickListener((View.OnLongClickListener)onLongClickListener);
 
-            deleteButton.setOnClickListener(new View.OnClickListener() {
+            playButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(final View view) {
-                    final PopupMenu popupMenu = new PopupMenu(context, deleteButton);
-                    try {
-                        Field[] fields = popupMenu.getClass().getDeclaredFields();
-                        for (Field field : fields) {
-                            if ("mPopup".equals(field.getName())) {
-                                field.setAccessible(true);
-                                Object menuPopupHelper = field.get(popupMenu);
-
-                                Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-
-                                Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-                                setForceIcons.invoke(menuPopupHelper, true);
-                                break;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            switch (item.getItemId()) {
-                                case R.id.deleteItem: {
-                                    timer.remove(getAdapterPosition());
-                                    onItemDelete.onItemDelete(getAdapterPosition());
-                                    return true;
-                                }
-                                case R.id.editItem: {
-                                    onTimerListener.onTimerClick(getAdapterPosition());
-                                    return true;
-                                }
-                                default: {
-                                    return false;
-                                }
-                            }
-                        }
-                    });
-                    popupMenu.show();
+                public void onClick(View v) {
+                    Context context = v.getContext();
+                    Intent intent = new Intent(context, ActiveActivity.class);
+                    intent.putExtra("timer", timerList.get(getAdapterPosition()));
+                    context.startActivity(intent);
                 }
             });
+
+            final PopupMenu.OnMenuItemClickListener onMenuListener = new PopupMenu.OnMenuItemClickListener() {
+                @SuppressLint("NonConstantResourceId")
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.deleteItem: {
+                            int position = getAdapterPosition();
+                            onItemDeleteListener.onItemDelete(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, getItemCount());
+                            return true;
+                        }
+                        case R.id.editItem: {
+                            onTimerListener.onTimerClick(getAdapterPosition());
+                            return true;
+                        }
+                        default: {
+                            return false;
+                        }
+
+                    }
+                }
+            };
+
+            View.OnClickListener onEditClick = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final PopupMenu popupMenu = new PopupMenu(editButton.getContext(), v);
+                    popupMenu.setOnMenuItemClickListener(onMenuListener);
+                    popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+                    showIcons(popupMenu);
+                    popupMenu.show();
+
+                }
+            };
+
+            editButton.setOnClickListener(onEditClick);
         }
+
 
         @Override
         public void onClick(View view) {
@@ -182,15 +190,36 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataHolder> im
         }
     }
 
-    interface OnTimerListener {
-        void onTimerClick(int position);
+    private void showIcons(PopupMenu popupMenu){
+        try {
+            Field[] fields = popupMenu.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                if ("mPopup".equals(field.getName())) {
+                    field.setAccessible(true);
+                    Object menuPopupHelper = field.get(popupMenu);
+                    Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                    Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon",
+                            boolean.class);
+                    setForceIcons.invoke(menuPopupHelper, true);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    interface OnItemDelete {
-        void onItemDelete(int position);
+
+    interface OnTimerListener {
+        void onTimerClick(int position);
     }
 
     interface OnLongTimerListener {
         void onLongClick(int position);
     }
+
+    interface OnItemDeleteListener {
+        void onItemDelete(int position);
+    }
+
 }

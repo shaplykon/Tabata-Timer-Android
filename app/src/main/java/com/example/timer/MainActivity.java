@@ -1,43 +1,74 @@
 package com.example.timer;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements DataAdapter.OnItemDelete, DataAdapter.OnTimerListener, DataAdapter.OnLongTimerListener {
+public class MainActivity extends AppCompatActivity implements
+        DataAdapter.OnItemDeleteListener,
+        DataAdapter.OnTimerListener,
+        DataAdapter.OnLongTimerListener
+{
 
     int ADD_DATA_REQUEST = 1;
     int EDIT_DATA_REQUEST = 2;
+    int SETTINGS_REQUEST = 3;
 
     RecyclerView recyclerView;
     ArrayList<TimerSequence> timerList = new ArrayList<>();
-    SQLiteHelper dbHelper;
     LinearLayoutManager linearLayoutManager;
     FloatingActionButton addButton;
     DataAdapter dataAdapter;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
-    @SuppressLint("SetTextI18n")
+    SQLitePhaseRepository phaseRepository;
+    SQLiteTimerRepository timerRepository;
+
+
+    @SuppressLint({"SetTextI18n", "CommitPrefEdits"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dbHelper = new SQLiteHelper(getApplicationContext());
+
+        timerRepository = new SQLiteTimerRepository(getApplicationContext());
+        phaseRepository = new SQLitePhaseRepository(getApplicationContext());
+
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = sharedPreferences.edit();
+
         recyclerView = findViewById(R.id.recyclerView);
         linearLayoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+
         addButton = findViewById(R.id.addButton);
         recyclerView.setLayoutManager(linearLayoutManager);
-        timerList = dbHelper.getList();
-        dataAdapter = new DataAdapter(MainActivity.this, timerList, this, this, this);
+        timerList = timerRepository.get();
+
+        dataAdapter = new DataAdapter(MainActivity.this, timerList, this, this);
         recyclerView.setAdapter(dataAdapter);
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(dataAdapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
@@ -47,17 +78,35 @@ public class MainActivity extends AppCompatActivity implements DataAdapter.OnIte
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
-                intent.putExtra("timer", (Bundle) null);
+                intent.putExtra("timer", new TimerSequence());
                 intent.putExtra("type", "add");
                 startActivityForResult(intent, ADD_DATA_REQUEST);
+
             }
         });
+
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
+    }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivityForResult(intent, SETTINGS_REQUEST );
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -73,39 +122,53 @@ public class MainActivity extends AppCompatActivity implements DataAdapter.OnIte
 
         if (requestCode == ADD_DATA_REQUEST) {
             if (resultCode == RESULT_OK && data != null) {
-                timerList.add((TimerSequence) data.getSerializableExtra("list"));
+                timerList.add((TimerSequence) data.getSerializableExtra("timer"));
+                recyclerView.getAdapter().notifyDataSetChanged();
             }
         } else if (requestCode == EDIT_DATA_REQUEST && resultCode == RESULT_OK && data != null) {
             TimerSequence timer = (TimerSequence) data.getSerializableExtra("timer");
             if (timer != null) {
-                for (int i = 0; i < timerList.size(); i++) {
-                    if (timerList.get(i).getId() == (timer.getId())) {
-                        timerList.set(i, timer);
+                for (int index = 0; index < timerList.size(); index++) {
+                    if (timerList.get(index).getId() == (timer.getId())) {
+                        timerList.set(index, timer);
+                        recyclerView.getAdapter().notifyDataSetChanged();
                         break;
                     }
                 }
             }
 
-        } else {
+        } else if(requestCode == SETTINGS_REQUEST && resultCode == RESULT_OK){
+            //editor.clear();
+            //editor.apply();
+            timerRepository.clear();
+            timerList.clear();
+            dataAdapter.notifyData(timerList);
+
+        }
+        else {
             super.onActivityResult(requestCode, resultCode, data);
         }
-        if (recyclerView.getAdapter() != null) {
-            recyclerView.getAdapter().notifyDataSetChanged();
-        }
+
     }
 
     @Override
     public void onLongClick(int position) {
-        //      Toast.makeText(this, "long", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "long", Toast.LENGTH_LONG).show();
     }
 
     @Override
-    public void onItemDelete(int position) {
-        dbHelper.deleteTimer(String.valueOf(timerList.get(position).getId()));
+    public void onItemDelete(final int position) {
+        phaseRepository.delete(timerList.get(position).getId());
+        timerRepository.delete(timerList.get(position).getId());
         timerList.remove(position);
-        if (recyclerView.getAdapter() != null) {
-            recyclerView.getAdapter().notifyDataSetChanged();
-
-        }
+        recyclerView.getRecycledViewPool().clear();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocaleHelper.setLocale(MainActivity.this, LocaleHelper.getLanguage(MainActivity.this));
+        recyclerView.getAdapter().notifyDataSetChanged();
+    }
+
 }
