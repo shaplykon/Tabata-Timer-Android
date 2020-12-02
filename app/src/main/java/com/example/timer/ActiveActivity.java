@@ -54,7 +54,7 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
     ActiveTimerViewModel activeViewModel;
     TimerReceiver broadcastReceiver;
 
-    SQLitePhaseRepository sqLitePhaseRepository;
+    PhaseRepository sqLitePhaseRepository;
 
     ListView tasksListView;
     TextView stageNameText;
