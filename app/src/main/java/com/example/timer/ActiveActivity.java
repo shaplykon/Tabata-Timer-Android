@@ -122,9 +122,11 @@ public class ActiveActivity extends AppCompatActivity implements OnItemClicked {
             }
         };
 
-        registerReceiver(notificationReceiver, new IntentFilter(ACTION_PREV));
-        registerReceiver(notificationReceiver, new IntentFilter(ACTION_PAUSE));
-        registerReceiver(notificationReceiver, new IntentFilter(ACTION_NEXT));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_PREV);
+        filter.addAction(ACTION_PAUSE);
+        filter.addAction(ACTION_NEXT);
+        registerReceiver(notificationReceiver, filter);
 
         IntentFilter intentFilter  = new IntentFilter(BROADCAST_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
